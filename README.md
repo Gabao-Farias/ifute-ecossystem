@@ -72,3 +72,9 @@ Repositório auxiliar para lidar com bloqueios de IP diretamente no host para pr
 Atualmente leve em consideração que o serviço estará sendo executado de forma monolítica e precisamos deixar o app o mais eficiente e simples possível nessa arquitetura enquanto for possível.
 
 A infraestrurua física consiste em uma única máquina VPS acessível por SSH para configuração.
+
+## Modelo de negócio
+
+De forma simplificada, sempre que um cliente faz agendamento, nós pegamos uma parcela de valor fixo (atualmente 4,99 reais) do bloco de horário (atualmente 30 min).
+
+Isso significa que se um cliente agendar um horário para jogar das 14:00 às 15:30, o faturamento da plataforma será de 3 * 4,99 já que pegou 3 * 30 min que é 4,99 resultando no valor total de 14.97.
