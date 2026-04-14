@@ -71,7 +71,7 @@ Repositório auxiliar para lidar com bloqueios de IP diretamente no host para pr
 
 Atualmente leve em consideração que o serviço estará sendo executado de forma monolítica e precisamos deixar o app o mais eficiente e simples possível nessa arquitetura enquanto for possível.
 
-A infraestrurua física consiste em uma única máquina VPS acessível por SSH para configuração.
+A infraestrurua física consiste em uma única máquina VPS (Almalinux) acessível por SSH para configuração.
 
 ## Modelo de negócio
 
