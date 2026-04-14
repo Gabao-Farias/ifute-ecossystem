@@ -2,6 +2,8 @@
 
 Este repositório serve para organizar e definir as diretrizes para todos os demais projetos que fazem parte da aplicação iFute como um todo.
 
+E todo o ecossistema em si, resume-se em um sistema de gestão de reservas de horários em quadras esportivas onde os jogadores podem acessar o app e agendar horários de forma avulsa ou recorrente, enquanto que os gestores administram a presença de suas quadras esportivas na plataforma, recebendo pagamentos e agendamentos de clientes.
+
 ## Repositórios
 
 ### App Mobile
@@ -64,3 +66,9 @@ Repositório auxiliar para lidar com bloqueios de IP diretamente no host para pr
 
 * Link: https://github.com/Gabao-Farias/ifute-iptabler
 * Local: `./ifute-iptabler`
+
+## Infraestrutura
+
+Atualmente leve em consideração que o serviço estará sendo executado de forma monolítica e precisamos deixar o app o mais eficiente e simples possível nessa arquitetura enquanto for possível.
+
+A infraestrurua física consiste em uma única máquina VPS acessível por SSH para configuração.
