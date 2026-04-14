@@ -56,3 +56,11 @@ Repositório auxiliar para deploys das aplicações envolvidas.
 
 * Link: https://github.com/Gabao-Farias/ifute-compose
 * Local: `./ifute-compose`
+
+
+### ifute-iptabler
+
+Repositório auxiliar para lidar com bloqueios de IP diretamente no host para previnir ataques ede potenciais agentes maliciosos.
+
+* Link: https://github.com/Gabao-Farias/ifute-iptabler
+* Local: `./ifute-iptabler`
