@@ -73,8 +73,25 @@ Atualmente leve em consideração que o serviço estará sendo executado de form
 
 A infraestrurua física consiste em uma única máquina VPS (Almalinux) acessível por SSH para configuração.
 
-## Modelo de negócio
+## Modelo de negócio e finanças
+
+### Receita
 
 De forma simplificada, sempre que um cliente faz agendamento, nós pegamos uma parcela de valor fixo (atualmente 4,99 reais) do bloco de horário (atualmente 30 min).
 
 Isso significa que se um cliente agendar um horário para jogar das 14:00 às 15:30, o faturamento da plataforma será de 3 * 4,99 já que pegou 3 * 30 min que é 4,99 resultando no valor total de 14.97.
+
+### Despesas
+
+* VPS: 50 reais / mês
+* Domínio: 40 reais / ano
+* Apple Developer: 500 reais / ano
+
+#### Asaas API
+
+* Pix (recebido): ~R$ 1,99 por transação
+* Cartão de crédito: À vista: ~R$ 0,49 + 2,99% Parcelado: até ~4,29% + R$ 0,49
+
+#### Comissão de Venda
+
+* 30% por transação
