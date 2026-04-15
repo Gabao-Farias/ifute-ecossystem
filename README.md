@@ -95,3 +95,8 @@ Isso significa que se um cliente agendar um horário para jogar das 14:00 às 15
 #### Comissão de Venda
 
 * 30% por transação
+
+
+## Tasks
+
+* task1 `./tasks/task1.md` não concluída
