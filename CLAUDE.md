@@ -51,6 +51,18 @@ Configuração nginx: `ifute-compose/nginx/conf.d/default.conf`
 - Comissão de venda: 30% por transação
 - Lógica de precificação: o administrador define quanto quer receber, e as taxas são repassadas ao cliente final
 
+## Glossário de Domínio
+
+| Termo (EN) | Termo (PT) | Descrição |
+|---|---|---|
+| **Place** | Local | Local físico que contém múltiplas quadras (ex: "Arena Futebol 7") |
+| **Court** | Quadra | Quadra esportiva pertencente a um Place. Pode ser de futebol, vôlei, tênis, etc. Cada quadra tem preço próprio por bloco de horário |
+| **Time Block** | Bloco de horário | Período de 30 minutos — unidade mínima de reserva. Ex: 1h = 2 blocos, 1h30 = 3 blocos |
+| **CourtAppointment** | Agendamento | Reserva avulsa de um bloco de horário em uma quadra |
+| **CourtRecurrentAppointment** | Agendamento recorrente | Reserva que se repete semanalmente nos mesmos dias/horários |
+| **CourtAppointmentOrder** | Ordem de pagamento | Vincula o pagamento (Stripe/Asaas) aos agendamentos de uma reserva |
+| **price_per_time_block** | Preço por bloco | Valor em R$ que o admin define por bloco de 30 min para cada quadra |
+
 ## Convenções
 
 - Idioma do código: inglês. Idioma de comunicação e documentação: português (BR)
