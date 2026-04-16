@@ -24,8 +24,22 @@ Cada subdiretório é um repositório Git independente. Consulte o CLAUDE.md de 
 
 - **Monolítico em VPS única** (AlmaLinux) acessível por SSH
 - Deploy via `ifute-compose/` (Docker Compose)
+- **Desenvolvimento local em WSL2** — para expor as portas à rede local (testes em dispositivos móveis etc.), rodar `scripts/wsl-expose-ports.ps1` como admin no PowerShell do Windows. Precisa rodar novamente após cada reinício do WSL (IP muda)
 - Priorize simplicidade e eficiência; não introduza microsserviços ou complexidade desnecessária
 - Banco de dados: PostgreSQL (único, compartilhado)
+
+## Portas e Domínios
+
+Mesmas portas são usadas localmente e em produção (nginx faz reverse proxy por subdomínio via HTTPS):
+
+| Porta | Serviço | Domínio (prod) |
+|---|---|---|
+| `7100` | `ifute-core-simple` (API backend) | `api.ifute.com.br` |
+| `7101` | `ifute-backoffice` (painel admin) | `backoffice.ifute.com.br` |
+| `7102` | `ifute-docs` (documentos) | `docs.ifute.com.br` |
+| `7103` | `ifute-landing-page` (landing) | `ifute.com.br` |
+
+Configuração nginx: `ifute-compose/nginx/conf.d/default.conf`
 
 ## Modelo de Negócio (referência para cálculos)
 
