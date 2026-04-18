@@ -49,8 +49,8 @@ Backend principal, aqui é onde fica toda a regra de negócio da aplicação, ta
 
 Repositório responsável por disparar processos agendados, cron, de operações administrativas, como por exemplo, emissões de faturas ou cancelamentos para usuários que tenham agendamentos recorrentes criados.
 
-* Link:https://github.com/Gabao-Farias/jobber
-* Local: `./jobber`
+* Link:https://github.com/Gabao-Farias/ifute-jobber
+* Local: `./ifute-jobber`
 
 ### ifute-compose
 

@@ -15,7 +15,7 @@ Este é um meta-repositório que organiza todos os projetos como subdiretórios:
 | `ifute-docs/` | Termos de uso e documentos legais | — |
 | `ifute-compose/` | Docker Compose para deploy | Docker |
 | `ifute-iptabler/` | Bloqueio de IPs maliciosos no host | Shell |
-| `jobber/` | Cron jobs (faturas, cancelamentos recorrentes) | — |
+| `ifute-jobber/` | Cron jobs (faturas, cancelamentos recorrentes) | — |
 | `match-ifute/` | Certificados Apple | — |
 
 Cada subdiretório é um repositório Git independente. Consulte o CLAUDE.md de cada um para detalhes internos (ex: `ifute-core-simple/CLAUDE.md`).
