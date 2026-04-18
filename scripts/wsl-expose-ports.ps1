@@ -16,7 +16,7 @@ Write-Host "IP do WSL: $wslIp" -ForegroundColor Cyan
 foreach ($port in $ports) {
     netsh interface portproxy delete v4tov4 listenport=$port listenaddress=0.0.0.0 2>$null
     netsh interface portproxy add v4tov4 listenport=$port listenaddress=0.0.0.0 connectport=$port connectaddress=$wslIp
-    Write-Host "Porta $port -> $wslIp:$port" -ForegroundColor Green
+    Write-Host "Porta $port -> ${wslIp}:$port" -ForegroundColor Green
 }
 
 # Firewall - remove regra antiga e cria nova
