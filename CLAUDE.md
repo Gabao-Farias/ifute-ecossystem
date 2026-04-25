@@ -44,7 +44,7 @@ Configuração nginx: `ifute-compose/nginx/conf.d/default.conf`
 ## Modelo de Negócio (referência para cálculos)
 
 - Taxa da plataforma: R$ 4,99 por bloco de 30 min reservado
-- Gateway de pagamento: Asaas API (migração em andamento, anteriormente Stripe)
+- Gateway de pagamento: Asaas API (via abstração `PaymentProvider` — backend agnóstico a provider, mas hoje só Asaas está plugado)
   - Pix: ~R$ 1,99/transação
   - Cartão à vista: ~R$ 0,49 + 2,99%
   - Cartão parcelado: até ~4,29% + R$ 0,49
@@ -60,7 +60,7 @@ Configuração nginx: `ifute-compose/nginx/conf.d/default.conf`
 | **Time Block** | Bloco de horário | Período de 30 minutos — unidade mínima de reserva. Ex: 1h = 2 blocos, 1h30 = 3 blocos |
 | **CourtAppointment** | Agendamento | Reserva avulsa de um bloco de horário em uma quadra |
 | **CourtRecurrentAppointment** | Agendamento recorrente | Reserva que se repete semanalmente nos mesmos dias/horários |
-| **CourtAppointmentOrder** | Ordem de pagamento | Vincula o pagamento (Stripe/Asaas) aos agendamentos de uma reserva |
+| **CourtAppointmentOrder** | Ordem de pagamento | Vincula o pagamento (provider ativo, ex: Asaas) aos agendamentos de uma reserva |
 | **price_per_time_block** | Preço por bloco | Valor em R$ que o admin define por bloco de 30 min para cada quadra |
 
 ## Convenções

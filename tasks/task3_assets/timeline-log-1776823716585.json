@@ -1,0 +1,310 @@
+[
+  {
+    "type": "api.response",
+    "important": false,
+    "payload": {
+      "request": {
+        "url": "http://192.168.1.223:7100/mobile/private/payment/paymentIntent",
+        "method": "POST",
+        "data": "{\"courts\":[{\"courtId\":\"ded46a8f-7907-40af-b653-93783363187a\",\"newAppointments\":[\"2026-04-22T23:30:00.000Z\",\"2026-04-23T00:00:00.000Z\"]}],\"placeId\":\"2930b1ce-e81e-4b15-8dd8-7a51fdac16e9\",\"payment_type\":\"credit-card\",\"recurrency\":[]}",
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "content-type": "application/json",
+          "day": "Wed Apr 22 2026 23:07:11 GMT-0300",
+          "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmY2ViZmU5Mi0yMWVkLTQ0MmMtODcxMi01MmE3ODE0YjRhZDQiLCJpYXQiOjE3NzY4MTAwMTEsImV4cCI6MTc3Njg1MzIxMX0.u9EL7g2F14yAK6uiKc_-mHLpPz0FwOAtpq8JGC2Rd18",
+          "timezoneoffset": "180",
+          "lat": "-28.278472",
+          "lon": "-54.2550968"
+        },
+        "params": null
+      },
+      "response": {
+        "body": {
+          "id": "pi_3TOqC4CfY3nvhnB71g1LPcCG",
+          "paymentIntent": "pi_3TOqC4CfY3nvhnB71g1LPcCG_secret_nLqU4I0Zq9lgvBHA4qKEvQeVA",
+          "ephemeralKey": "ek_test_YWNjdF8xT0lWcHlDZlkzbnZobkI3LFh0dThMdk1LTE1TSFkzNWFkZ21NckpHZU9aUzN3UE4_00yvDs5Lbs",
+          "customer": "cus_PKKDfDtToN2XyD",
+          "publishableKey": "pk_test_51OIVpyCfY3nvhnB76GhBDnHTRHnkPP1DfQtI34NsMsUMOafpRV8lHbRtvXiIcC2L3IqICUu1K5pDB6i4lwTVPsSZ00evknba7I",
+          "order_id": "3184d007-acc3-4f23-8b8f-a113b4475ed4"
+        },
+        "status": 200,
+        "headers": {
+          "X-Powered-By": "Express",
+          "Content-Length": "432",
+          "Connection": "keep-alive",
+          "X-RateLimit-Reset": "1776823644",
+          "X-RateLimit-Remaining": "38",
+          "Content-Type": "application/json; charset=utf-8",
+          "X-RateLimit-Limit": "50",
+          "RateLimit-Remaining": "38",
+          "ETag": "W/\"1b0-QDQwbvTmOunTOm1dZb+aNJLdlEY\"",
+          "Date": "Wed, 22 Apr 2026 02:07:10 GMT",
+          "RateLimit-Limit": "50",
+          "RateLimit-Policy": "50;w=60",
+          "RateLimit-Reset": "13",
+          "Keep-Alive": "timeout=5"
+        }
+      },
+      "duration": 1976.8424220085144
+    },
+    "connectionId": 1,
+    "messageId": 46,
+    "date": "2026-04-22T02:07:13.422Z",
+    "deltaTime": 25433,
+    "clientId": "React Native Demo-android-36-SM-S731B-384-832-2.8125"
+  },
+  {
+    "type": "api.response",
+    "important": false,
+    "payload": {
+      "request": {
+        "url": "http://192.168.1.223:7100/mobile/private/place?place_id=2930b1ce-e81e-4b15-8dd8-7a51fdac16e9",
+        "method": "GET",
+        "data": null,
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "day": "Wed Apr 22 2026 23:06:47 GMT-0300",
+          "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmY2ViZmU5Mi0yMWVkLTQ0MmMtODcxMi01MmE3ODE0YjRhZDQiLCJpYXQiOjE3NzY4MTAwMTEsImV4cCI6MTc3Njg1MzIxMX0.u9EL7g2F14yAK6uiKc_-mHLpPz0FwOAtpq8JGC2Rd18",
+          "timezoneoffset": "180",
+          "lat": "-28.278472",
+          "lon": "-54.2550968"
+        },
+        "params": {
+          "place_id": "2930b1ce-e81e-4b15-8dd8-7a51fdac16e9"
+        }
+      },
+      "response": {
+        "body": {
+          "place_id": "2930b1ce-e81e-4b15-8dd8-7a51fdac16e9",
+          "name": "Boladão",
+          "description": "Um local excelente para trazer os mais chegados e bater aquela bola na massa.",
+          "brand_image": "https://img.freepik.com/premium-vector/football-badge-logo-soccer-ball-team-game-club-elements-fit-championship-team_619942-179.jpg",
+          "courts": [
+            {
+              "court_id": "ded46a8f-7907-40af-b653-93783363187a",
+              "name": "Bloco 1",
+              "sport": "soccer7",
+              "price_per_time_block": 120,
+              "appointments": [],
+              "recurrent_appointments": []
+            }
+          ],
+          "reviews": [],
+          "images": [
+            {
+              "image_id": "c1553927-81fb-44ab-a429-fba32c5aad29",
+              "url": "https://montevallofalcons.com/images/2023/7/14/soccerf_field.jpg"
+            },
+            {
+              "image_id": "b047a190-1054-4569-bfcb-4a76a0cdadf7",
+              "url": "https://www.soccercenters.com/wp-content/uploads/2011/03/13047648_10206811331429965_5749135250356006282_o-1024x681.jpg"
+            }
+          ],
+          "location": {
+            "place_id": "2930b1ce-e81e-4b15-8dd8-7a51fdac16e9",
+            "lat": -28.300049,
+            "lon": -54.267,
+            "city": "Santo Ângelo",
+            "state": "Rio Grande do Sul",
+            "country": "BR",
+            "citystatecountry": "Santo Ângelo;Rio Grande do Sul;BR"
+          },
+          "availability": [
+            {
+              "availability_id": "56c42843-33de-43c3-af82-47687511f77b",
+              "opens_at_hours": 16,
+              "closes_at_hours": 24,
+              "opens_at_minutes": 0,
+              "closes_at_minutes": 0,
+              "repeats": "monday"
+            },
+            {
+              "availability_id": "56c42843-33de-43c3-af82-47687511f770",
+              "opens_at_hours": 16,
+              "closes_at_hours": 24,
+              "opens_at_minutes": 0,
+              "closes_at_minutes": 0,
+              "repeats": "tuesday"
+            },
+            {
+              "availability_id": "56c42843-33de-43c3-af82-47687511f771",
+              "opens_at_hours": 16,
+              "closes_at_hours": 24,
+              "opens_at_minutes": 0,
+              "closes_at_minutes": 0,
+              "repeats": "wednesday"
+            },
+            {
+              "availability_id": "56c42843-33de-43c3-af82-47687511f772",
+              "opens_at_hours": 16,
+              "closes_at_hours": 24,
+              "opens_at_minutes": 0,
+              "closes_at_minutes": 0,
+              "repeats": "thursday"
+            },
+            {
+              "availability_id": "56c42843-33de-43c3-af82-47687511f773",
+              "opens_at_hours": 16,
+              "closes_at_hours": 24,
+              "opens_at_minutes": 0,
+              "closes_at_minutes": 0,
+              "repeats": "friday"
+            },
+            {
+              "availability_id": "56c42843-33de-43c3-af82-47687511f774",
+              "opens_at_hours": 16,
+              "closes_at_hours": 24,
+              "opens_at_minutes": 0,
+              "closes_at_minutes": 0,
+              "repeats": "saturday"
+            },
+            {
+              "availability_id": "56c42843-33de-43c3-af82-47687511f775",
+              "opens_at_hours": 16,
+              "closes_at_hours": 24,
+              "opens_at_minutes": 0,
+              "closes_at_minutes": 0,
+              "repeats": "sunday"
+            }
+          ],
+          "config": {
+            "place_id": "2930b1ce-e81e-4b15-8dd8-7a51fdac16e9",
+            "time_limit_hours_to_delete_appointment": 48,
+            "max_post_pay_appointments": 2,
+            "min_trustability_for_post_pay": 70,
+            "timezone_offset": 180
+          },
+          "exception_dates": [
+            {
+              "exception_date_id": "ae991018-65f8-4c5d-9e4f-f68dda1a87f2",
+              "exception_date": "2030-01-21"
+            }
+          ],
+          "metadata": {
+            "post_pay_appointments_count": 0
+          }
+        },
+        "status": 200,
+        "headers": {
+          "X-Powered-By": "Express",
+          "Content-Length": "2533",
+          "Connection": "keep-alive",
+          "X-RateLimit-Reset": "1776823644",
+          "X-RateLimit-Remaining": "39",
+          "Content-Type": "application/json; charset=utf-8",
+          "X-RateLimit-Limit": "50",
+          "RateLimit-Remaining": "39",
+          "ETag": "W/\"9e5-OwrAz87bCerB6pi2ZybJ3wDvgcg\"",
+          "Date": "Wed, 22 Apr 2026 02:06:47 GMT",
+          "RateLimit-Limit": "50",
+          "RateLimit-Policy": "50;w=60",
+          "RateLimit-Reset": "37",
+          "Keep-Alive": "timeout=5"
+        }
+      },
+      "duration": 269.8953120112419
+    },
+    "connectionId": 1,
+    "messageId": 45,
+    "date": "2026-04-22T02:06:47.989Z",
+    "deltaTime": 40,
+    "clientId": "React Native Demo-android-36-SM-S731B-384-832-2.8125"
+  },
+  {
+    "type": "api.response",
+    "important": false,
+    "payload": {
+      "request": {
+        "url": "http://192.168.1.223:7100/mobile/private/user/favorites",
+        "method": "GET",
+        "data": null,
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "day": "Wed Apr 22 2026 23:06:47 GMT-0300",
+          "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmY2ViZmU5Mi0yMWVkLTQ0MmMtODcxMi01MmE3ODE0YjRhZDQiLCJpYXQiOjE3NzY4MTAwMTEsImV4cCI6MTc3Njg1MzIxMX0.u9EL7g2F14yAK6uiKc_-mHLpPz0FwOAtpq8JGC2Rd18",
+          "timezoneoffset": "180",
+          "lat": "-28.278472",
+          "lon": "-54.2550968"
+        },
+        "params": null
+      },
+      "response": {
+        "body": [],
+        "status": 200,
+        "headers": {
+          "X-Powered-By": "Express",
+          "Content-Length": "2",
+          "Connection": "keep-alive",
+          "X-RateLimit-Reset": "1776823644",
+          "X-RateLimit-Remaining": "41",
+          "Content-Type": "application/json; charset=utf-8",
+          "X-RateLimit-Limit": "50",
+          "RateLimit-Remaining": "41",
+          "ETag": "W/\"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w\"",
+          "Date": "Wed, 22 Apr 2026 02:06:47 GMT",
+          "RateLimit-Limit": "50",
+          "RateLimit-Policy": "50;w=60",
+          "RateLimit-Reset": "37",
+          "Keep-Alive": "timeout=5"
+        }
+      },
+      "duration": 230.06363195180893
+    },
+    "connectionId": 1,
+    "messageId": 44,
+    "date": "2026-04-22T02:06:47.949Z",
+    "deltaTime": 4,
+    "clientId": "React Native Demo-android-36-SM-S731B-384-832-2.8125"
+  },
+  {
+    "type": "api.response",
+    "important": false,
+    "payload": {
+      "request": {
+        "url": "http://192.168.1.223:7100/mobile/public/businessConfig",
+        "method": "GET",
+        "data": null,
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "day": "Wed Apr 22 2026 23:06:47 GMT-0300",
+          "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmY2ViZmU5Mi0yMWVkLTQ0MmMtODcxMi01MmE3ODE0YjRhZDQiLCJpYXQiOjE3NzY4MTAwMTEsImV4cCI6MTc3Njg1MzIxMX0.u9EL7g2F14yAK6uiKc_-mHLpPz0FwOAtpq8JGC2Rd18",
+          "timezoneoffset": "180",
+          "lat": "-28.278472",
+          "lon": "-54.2550968"
+        },
+        "params": null
+      },
+      "response": {
+        "body": {
+          "id": "d0cacd0b-11fa-42b2-b802-82033103ae52",
+          "tax_value_per_hour": 1.99,
+          "stripe_percentage_fee_per_payment": 0.0399,
+          "stripe_fixed_fee_per_payment": 0.39
+        },
+        "status": 200,
+        "headers": {
+          "X-Powered-By": "Express",
+          "Content-Length": "150",
+          "Connection": "keep-alive",
+          "X-RateLimit-Reset": "1776823644",
+          "X-RateLimit-Remaining": "40",
+          "Content-Type": "application/json; charset=utf-8",
+          "X-RateLimit-Limit": "50",
+          "RateLimit-Remaining": "40",
+          "ETag": "W/\"96-2inItLE7Ds5qaBuTzAAr6ppUEY0\"",
+          "Date": "Wed, 22 Apr 2026 02:06:47 GMT",
+          "RateLimit-Limit": "50",
+          "RateLimit-Policy": "50;w=60",
+          "RateLimit-Reset": "37",
+          "Keep-Alive": "timeout=5"
+        }
+      },
+      "duration": 226.78800702095032
+    },
+    "connectionId": 1,
+    "messageId": 43,
+    "date": "2026-04-22T02:06:47.945Z",
+    "deltaTime": 7825,
+    "clientId": "React Native Demo-android-36-SM-S731B-384-832-2.8125"
+  }
+]
