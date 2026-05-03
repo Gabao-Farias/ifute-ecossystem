@@ -43,11 +43,8 @@ Configuração nginx: `ifute-compose/nginx/conf.d/default.conf`
 
 ## Modelo de Negócio (referência para cálculos)
 
-- Taxa da plataforma: R$ 4,99 por bloco de 30 min reservado
-- Gateway de pagamento: Asaas API (via abstração `PaymentProvider` — backend agnóstico a provider, mas hoje só Asaas está plugado)
-  - Pix: ~R$ 1,99/transação
-  - Cartão à vista: ~R$ 0,49 + 2,99%
-  - Cartão parcelado: até ~4,29% + R$ 0,49
+- Taxa da plataforma: cobrada **por bloco de 30 min reservado**. O valor exato vem do banco — `business_config.tax_value_per_time_block` é a única fonte de verdade. Documentação não fixa o número porque ele muda conforme decisão comercial; sempre leia do DB.
+- Gateway de pagamento: Asaas API (via abstração `PaymentProvider` — backend agnóstico a provider, mas hoje só Asaas está plugado). Taxas exatas (Pix, cartão à vista, parcelado) também ficam no DB em `business_config.provider_fees` (JSONB).
 - Comissão de venda: 30% por transação
 - Lógica de precificação: o administrador define quanto quer receber, e as taxas são repassadas ao cliente final
 
@@ -62,6 +59,7 @@ Configuração nginx: `ifute-compose/nginx/conf.d/default.conf`
 | **CourtRecurrentAppointment** | Agendamento recorrente | Reserva que se repete semanalmente nos mesmos dias/horários |
 | **CourtAppointmentOrder** | Ordem de pagamento | Vincula o pagamento (provider ativo, ex: Asaas) aos agendamentos de uma reserva |
 | **price_per_time_block** | Preço por bloco | Valor em R$ que o admin define por bloco de 30 min para cada quadra |
+| **tax_value_per_time_block** | Taxa da plataforma por bloco | Comissão da iFute por bloco de 30 min reservado. Coluna em `business_config` — única fonte de verdade do valor (a documentação só descreve a regra; o número está no DB) |
 
 ## Convenções
 
