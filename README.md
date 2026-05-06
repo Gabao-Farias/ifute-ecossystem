@@ -96,6 +96,20 @@ Isso significa que se um cliente agendar um horário para jogar das 14:00 às 15
 
 * 30% por transação
 
+### Programa de Afiliados (padrinhos)
+
+Todo administrador cadastrado no backoffice pode gerar um link de indicação. Quando outro admin se cadastra usando o link, vira **afiliado** e o indicador (**padrinho**) passa a receber comissão de cada agendamento feito nas quadras do afiliado.
+
+* **Comissão**: 20% sobre `tax_value_per_time_block` por bloco agendado, arredondado para baixo. Ex.: para uma reserva de 1h30 (3 blocos), padrinho recebe 3 × R$ 0,99 = R$ 2,97
+* **Duração do vínculo**: 3 anos a partir da data de cadastro do afiliado
+* **Indicação direta apenas**: sem multinível
+* **Auto-afiliação bloqueada**: admin não pode usar o próprio link
+* **Vínculo imutável**: uma vez vinculado, o afiliado não pode trocar de padrinho
+* **Chave PIX dedicada**: o padrinho cadastra uma chave PIX **separada** da que usa para receber pelas suas próprias quadras. Aba dedicada no backoffice em `/dashboard/affiliates`
+* **Pagamento**: junto com o repasse normal das ordens (via PIX out do Asaas, no mesmo cron `collect_cash`)
+
+Detalhes operacionais e de implementação em [`./CLAUDE.md`](./CLAUDE.md), [`./ifute-core-simple/CLAUDE.md`](./ifute-core-simple/CLAUDE.md) e no planejamento da feature em [`./tasks/task11-planning.md`](./tasks/task11-planning.md).
+
 
 ## Tasks
 
