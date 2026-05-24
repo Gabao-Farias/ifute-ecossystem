@@ -43,13 +43,29 @@ Configuração nginx: `ifute-compose/nginx/conf.d/default.conf`
 
 ## Modelo de Negócio (referência para cálculos)
 
-- Taxa da plataforma: R$ 4,99 por bloco de 30 min reservado
+- Taxa da plataforma: R$ 4,99 por bloco de 30 min reservado (`tax_value_per_time_block`)
 - Gateway de pagamento: Asaas API (via abstração `PaymentProvider` — backend agnóstico a provider, mas hoje só Asaas está plugado)
   - Pix: ~R$ 1,99/transação
   - Cartão à vista: ~R$ 0,49 + 2,99%
   - Cartão parcelado: até ~4,29% + R$ 0,49
 - Comissão de venda: 30% por transação
 - Lógica de precificação: o administrador define quanto quer receber, e as taxas são repassadas ao cliente final
+
+### Programa de Afiliados (padrinhos)
+
+Todo admin do backoffice pode gerar um **link de indicação**. Quando outro admin se cadastra usando esse link, vira **afiliado** do indicador (padrinho). O padrinho passa a receber comissão de cada agendamento feito nas quadras do afiliado.
+
+- **Comissão**: 20% sobre `tax_value_per_time_block` por bloco agendado, arredondado para baixo em centavos. Hoje: `floor(20 × 499 / 100) = 99` centavos por bloco. Plataforma fica com R$ 4,00 por bloco (antes dos custos do Asaas)
+- **Duração do vínculo**: 3 anos a partir do cadastro do afiliado. Após esse prazo, novas orders deixam de gerar comissão; orders criadas dentro do prazo continuam sendo pagas mesmo se o transfer só ocorrer depois
+- **Indicação direta apenas**: sem multinível. Se A indica B e B indica C, A não ganha nada de C
+- **Auto-afiliação bloqueada**: admin não pode usar o próprio link
+- **Vínculo imutável**: uma vez criado, afiliado não pode trocar de padrinho
+- **Snapshot por order**: o percentual e o valor calculado da comissão são gravados na ordem no momento da compra (`affiliate_commission_value_cents`, `affiliate_commission_percent_at_order`). Mudanças futuras na configuração não afetam orders já criadas
+- **Chave PIX dedicada**: o padrinho cadastra uma chave PIX **separada** da chave usada para receber pelos seus próprios locais. Por isso a aba dedicada no backoffice (`/dashboard/affiliates`)
+- **Pagamento**: PIX out via Asaas, no mesmo cron `collect_cash` Fase 2 que repassa para o admin da quadra. Cada order com comissão dispara 2 PIX out (admin + padrinho), cada um custando ~R$ 1,99 — o segundo é absorvido pela plataforma
+- **Estorno após transfer**: por contrato com o usuário, estornos só podem ocorrer enquanto o capital ainda está na master da iFute, então não tratamos chargebacks pós-transfer
+
+Detalhes técnicos do fluxo (snapshot, cron, webhook auth, edge cases) em [`ifute-core-simple/CLAUDE.md`](ifute-core-simple/CLAUDE.md). Planejamento completo da feature em [`tasks/task11-planning.md`](tasks/task11-planning.md).
 
 ## Glossário de Domínio
 
@@ -62,6 +78,11 @@ Configuração nginx: `ifute-compose/nginx/conf.d/default.conf`
 | **CourtRecurrentAppointment** | Agendamento recorrente | Reserva que se repete semanalmente nos mesmos dias/horários |
 | **CourtAppointmentOrder** | Ordem de pagamento | Vincula o pagamento (provider ativo, ex: Asaas) aos agendamentos de uma reserva |
 | **price_per_time_block** | Preço por bloco | Valor em R$ que o admin define por bloco de 30 min para cada quadra |
+| **tax_value_per_time_block** | Taxa da plataforma por bloco | Valor em R$ que a iFute cobra por bloco agendado (R$ 4,99 hoje). Base do cálculo da comissão de afiliação |
+| **Referrer / Partner** | Padrinho / Parceiro | Admin que indicou outro admin via seu link de afiliação |
+| **Affiliate** | Afiliado / Indicado | Admin que se cadastrou usando o link de outro admin. Vínculo dura 3 anos |
+| **Referral Code** | Código de indicação | Identificador único do admin usado em `?ref=CÓDIGO` no link de signup |
+| **Affiliate Commission** | Comissão de afiliação | 20% do `tax_value_per_time_block` repassado ao padrinho a cada bloco agendado nas quadras do afiliado |
 
 ## Convenções
 
