@@ -224,5 +224,91 @@ automaticamente (decisão "manter boot"). Por isso o backup da Fase 2 é pré-co
 
 ## Itens a criar/decidir durante a execução
 
-- [ ] (Opcional) `ifute-compose/scripts/migrate-prd.sh`: backup → `migrations:run` → verificação,
-      como wrapper único do passo manual da Fase 4. Útil para futuras migrações controladas.
+- [x] `ifute-compose/scripts/migrate-prd.sh` criado (2026-06-02): backup → `migrations:run` →
+      verificação, como wrapper único e reutilizável. Suporta `--expect <migration>` e `-y`.
+      README e `release.sh` atualizados para apontar pra ele.
+
+---
+
+## Apêndice — Runbook de execução (status em 2026-06-01)
+
+### Progresso
+
+- ✅ **Fase 0 concluída** — `DropAsaasWalletId` renumerada para `1777600000001` (arquivo + classe).
+  PR [`ifute-core-simple#84`](https://github.com/Gabao-Farias/ifute-core-simple/pull/84),
+  branch `chore/fix-duplicate-migration-timestamp`. `tsc --noEmit` passou.
+- ✅ **Fase 1 verificada** — SSH OK; servidor tem Docker 28.4.0; prod confirmado em
+  `Migration1746318492279`.
+- ✅ **Validação `db:reset` concluída (2026-06-02)** — rodada contra Postgres local
+  (`ifute-dev-postgresdb-1`, postgres:16.4). As 25 migrations sobem do zero sem erro;
+  topo = `BusinessConfigAffiliatePercent1779000000002`; `DropAsaasWalletId1777600000001`
+  registrada (timestamp antigo ausente); `court` existe, `place_block` removida,
+  `asaas_wallet_id` removida, `affiliate_commission_percent` criada.
+- ⚠️ **Build/release será feito pelo mantenedor** (máquina de dev não tinha Docker nem os `.env*`).
+  Decisão: rodar `release.sh` a partir de uma máquina com Docker + os `.env*` de produção.
+
+### Baseline de produção (capturada antes da migração — use para validar preservação)
+
+| Métrica | Valor pré-deploy |
+|---|---|
+| `count("user")` | **27** |
+| Tabela `place_block` (schema antigo) | **existe** |
+| Tabela `court` (schema novo) | **não existe** |
+
+Após a migração: `court` deve existir, `place_block` não, e `count("user")` continuar **27**.
+
+### Pré-passos (na máquina de dev, antes do release)
+
+```sh
+# 1) Trazer a correção da Fase 0 para a main e atualizar o working tree
+#    (merge do PR #84 e pull no ifute-core-simple)
+cd ifute-core-simple && git checkout main && git pull
+
+# 2) (Recomendado) bump de versão p/ rastreabilidade da imagem
+#    core 0.0.4 → 0.0.5 ; backoffice 0.0.2 → 0.0.3
+#    (mesmo sem bump, o compose recria o container quando o image-ID muda)
+
+# 3) (Recomendado) validar que as 14 migrations sobem do zero — NÃO foi possível na máquina de dev
+cd ifute-core-simple && npm run db:reset   # exige Docker/Postgres local
+```
+
+### Fase 2 — Backup (obrigatório antes do release)
+
+```sh
+ssh -p 51765 root@api.ifute.com.br '/root/backup-db.sh'
+# baixar cópia para fora da VPS:
+rsync -avz -e "ssh -p 51765" root@api.ifute.com.br:/root/backups/ ./backups-prd/
+# conferir que o dump mais recente não está vazio
+```
+
+### Fase 3 — Release (⚠️ o boot do core roda as 14 migrations automaticamente)
+
+```sh
+cd ifute-compose
+# (se mudou compose/nginx/env) ./scripts/deploy-prd.sh
+./scripts/release.sh ifute-core-simple ifute-backoffice
+# acompanhar boot + migração:
+ssh -p 51765 root@api.ifute.com.br \
+  'cd /root/repos/ifute-compose && docker compose logs --tail=120 -f ifute-core-simple'
+# esperado nos logs: "Running migrations..." → "Migrations run finish!" (sem crash-loop)
+```
+
+### Fase 4 — Verificação
+
+```sh
+ssh -p 51765 root@api.ifute.com.br 'cd /root/repos/ifute-compose && docker compose exec -T postgresdb \
+  sh -c '"'"'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT name FROM migrations ORDER BY timestamp DESC LIMIT 3;"'"'"''
+# esperado topo: BusinessConfigAffiliatePercent1779000000002
+
+# preservação de dados (comparar com a baseline acima):
+#   count("user") = 27 ; tabela court existe ; place_block não existe
+```
+
+### Fase 5 — Smoke test
+
+Ver checklist da Fase 5 acima (API pública, login backoffice, listagem de quadras,
+order+PIX, aba afiliados, jobber rodando).
+
+### Rollback
+
+Ver seção "Rollback" acima — restaurar o dump da Fase 2 e reverter `IFUTE_CORE_SIMPLE_TAG`.
