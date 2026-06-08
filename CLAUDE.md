@@ -58,7 +58,7 @@ Pontos de atenção:
 
 - **Versionar antes de releasar**: a tag da imagem vem da `version` do `package.json` do app. Bumpe a versão (`npm version patch --no-git-tag-version`) e commite **antes** do `release.sh`, senão a nova imagem reusa uma tag já em produção.
 - **Arquitetura**: a VPS é x86_64; o `release.sh` builda sempre para `linux/amd64`. Em máquina ARM (Apple Silicon) isso usa emulação qemu — mais lento, porém correto. O script falha cedo se a arquitetura não bater.
-- **Migrações de banco**: o `release.sh` **não roda migrações**. Após um release do `ifute-core-simple` que inclua migrations, rode `./scripts/migrate-prd.sh` (backup → `migrations:run` → verificação).
+- **Migrações de banco**: controladas, **não automáticas**. O boot do `ifute-core-simple` não aplica migrations em prod (`RUN_MIGRATIONS_ON_BOOT` default `false` quando `NODE_ENV=prd`), e o `release.sh` também não. Após um release do core que inclua migrations, rodar `./scripts/migrate-prd.sh` (backup → `migrations:run:prod` → verificação) é **obrigatório**.
 
 ## Modelo de Negócio (referência para cálculos)
 
