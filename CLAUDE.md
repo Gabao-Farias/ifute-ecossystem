@@ -56,7 +56,7 @@ Configuração nginx: `ifute-compose/nginx/conf.d/default.conf`
 Todo admin do backoffice pode gerar um **link de indicação**. Quando outro admin se cadastra usando esse link, vira **afiliado** do indicador (padrinho). O padrinho passa a receber comissão de cada agendamento feito nas quadras do afiliado.
 
 - **Comissão**: 20% sobre `tax_value_per_time_block` por bloco agendado, arredondado para baixo em centavos. Hoje: `floor(20 × 499 / 100) = 99` centavos por bloco. Plataforma fica com R$ 4,00 por bloco (antes dos custos do Asaas)
-- **Duração do vínculo**: 3 anos a partir do cadastro do afiliado. Após esse prazo, novas orders deixam de gerar comissão; orders criadas dentro do prazo continuam sendo pagas mesmo se o transfer só ocorrer depois
+- **Duração do vínculo**: indeterminada. Uma vez criado, o vínculo nunca expira — todas as orders das quadras do afiliado continuam gerando comissão indefinidamente
 - **Indicação direta apenas**: sem multinível. Se A indica B e B indica C, A não ganha nada de C
 - **Auto-afiliação bloqueada**: admin não pode usar o próprio link
 - **Vínculo imutável**: uma vez criado, afiliado não pode trocar de padrinho
@@ -80,7 +80,7 @@ Detalhes técnicos do fluxo (snapshot, cron, webhook auth, edge cases) em [`ifut
 | **price_per_time_block** | Preço por bloco | Valor em R$ que o admin define por bloco de 30 min para cada quadra |
 | **tax_value_per_time_block** | Taxa da plataforma por bloco | Valor em R$ que a iFute cobra por bloco agendado (R$ 4,99 hoje). Base do cálculo da comissão de afiliação |
 | **Referrer / Partner** | Padrinho / Parceiro | Admin que indicou outro admin via seu link de afiliação |
-| **Affiliate** | Afiliado / Indicado | Admin que se cadastrou usando o link de outro admin. Vínculo dura 3 anos |
+| **Affiliate** | Afiliado / Indicado | Admin que se cadastrou usando o link de outro admin. Vínculo por tempo indeterminado |
 | **Referral Code** | Código de indicação | Identificador único do admin usado em `?ref=CÓDIGO` no link de signup |
 | **Affiliate Commission** | Comissão de afiliação | 20% do `tax_value_per_time_block` repassado ao padrinho a cada bloco agendado nas quadras do afiliado |
 
