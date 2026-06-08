@@ -41,6 +41,25 @@ Mesmas portas são usadas localmente e em produção (nginx faz reverse proxy po
 
 Configuração nginx: `ifute-compose/nginx/conf.d/default.conf`
 
+## Deploy
+
+Todo o deploy é orquestrado por `ifute-compose/` (Docker Compose em VPS única, via SSH). **Sem registry externo**: as imagens são buildadas localmente, exportadas com `docker save`, enviadas por `rsync` e carregadas no servidor com `docker load`. Documentação completa (Ansible, SSL, túnel de banco, backups) em [`ifute-compose/README.md`](ifute-compose/README.md).
+
+Há **dois tipos de deploy**, intencionalmente separados (rodar de dentro de `ifute-compose/`):
+
+| Quando muda... | Comando | O que faz |
+|---|---|---|
+| Código de um app | `./scripts/release.sh <app> [<app> ...]` (ou `all`) | Builda a imagem `<nome>:<version do package.json>`, sincroniza a `*_TAG` no `.env`, envia e recria **só aquele(s) serviço(s)** |
+| Compose, nginx ou `.env*` | `./scripts/deploy-prd.sh` | Envia **só a configuração** e recria os containers com as imagens já presentes |
+
+Apps válidos para `release.sh`: `ifute-core-simple`, `ifute-backoffice`, `ifute-jobber`, `ifute-docs`, `ifute-landing-page`.
+
+Pontos de atenção:
+
+- **Versionar antes de releasar**: a tag da imagem vem da `version` do `package.json` do app. Bumpe a versão (`npm version patch --no-git-tag-version`) e commite **antes** do `release.sh`, senão a nova imagem reusa uma tag já em produção.
+- **Arquitetura**: a VPS é x86_64; o `release.sh` builda sempre para `linux/amd64`. Em máquina ARM (Apple Silicon) isso usa emulação qemu — mais lento, porém correto. O script falha cedo se a arquitetura não bater.
+- **Migrações de banco**: o `release.sh` **não roda migrações**. Após um release do `ifute-core-simple` que inclua migrations, rode `./scripts/migrate-prd.sh` (backup → `migrations:run` → verificação).
+
 ## Modelo de Negócio (referência para cálculos)
 
 - Taxa da plataforma: R$ 4,99 por bloco de 30 min reservado (`tax_value_per_time_block`)
