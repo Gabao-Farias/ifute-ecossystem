@@ -64,9 +64,10 @@ Pontos de atenção:
 
 - Taxa da plataforma: R$ 4,99 por bloco de 30 min reservado (`tax_value_per_time_block`)
 - Gateway de pagamento: Asaas API (via abstração `PaymentProvider` — backend agnóstico a provider, mas hoje só Asaas está plugado)
-  - Pix: ~R$ 1,99/transação
+  - **PIX IN** (recebimento da cobrança): ~R$ 1,99/transação
   - Cartão à vista: ~R$ 0,49 + 2,99%
   - Cartão parcelado: até ~4,29% + R$ 0,49
+  - **PIX OUT** (saque/repasse de saída): R$ 2,00 por saque — taxa **distinta** do PIX IN, configurável em `BusinessConfig.withdrawal_fee_cents`, descontada de quem saca (Task 18)
 - Comissão de venda: 30% por transação
 - Lógica de precificação: o administrador define quanto quer receber, e as taxas são repassadas ao cliente final
 
@@ -81,10 +82,10 @@ Todo admin do backoffice pode gerar um **link de indicação**. Quando outro adm
 - **Vínculo imutável**: uma vez criado, afiliado não pode trocar de padrinho
 - **Snapshot por order**: o percentual e o valor calculado da comissão são gravados na ordem no momento da compra (`affiliate_commission_value_cents`, `affiliate_commission_percent_at_order`). Mudanças futuras na configuração não afetam orders já criadas
 - **Chave PIX dedicada**: o padrinho cadastra uma chave PIX **separada** da chave usada para receber pelos seus próprios locais. Por isso a aba dedicada no backoffice (`/dashboard/affiliates`)
-- **Pagamento**: PIX out via Asaas, no mesmo cron `collect_cash` Fase 2 que repassa para o admin da quadra. Cada order com comissão dispara 2 PIX out (admin + padrinho), cada um custando ~R$ 1,99 — o segundo é absorvido pela plataforma
-- **Estorno após transfer**: por contrato com o usuário, estornos só podem ocorrer enquanto o capital ainda está na master da iFute, então não tratamos chargebacks pós-transfer
+- **Pagamento (Task 18)**: a comissão é acumulada num **saldo de comissões** (segundo saldo do admin, separado do saldo de quadras). O cron `collect_cash` Fase 2 **credita** o saldo (não faz mais PIX out por order); o padrinho **saca sob demanda** no backoffice, pagando a taxa de saque do Asaas (R$ 2,00). Saldo de quadras e de comissões são sacados separadamente, cada um para sua chave PIX
+- **Estorno após settlement**: por contrato com o usuário, estornos só podem ocorrer enquanto o capital ainda está na master da iFute (antes da janela de cancelamento), então não tratamos chargebacks após o saldo ser creditado
 
-Detalhes técnicos do fluxo (snapshot, cron, webhook auth, edge cases) em [`ifute-core-simple/CLAUDE.md`](ifute-core-simple/CLAUDE.md). Planejamento completo da feature em [`tasks/task11-planning.md`](tasks/task11-planning.md).
+Detalhes técnicos do fluxo (snapshot, cron, saque, webhook auth, edge cases) em [`ifute-core-simple/CLAUDE.md`](ifute-core-simple/CLAUDE.md). Planejamento: afiliação em [`tasks/task11-planning.md`](tasks/task11-planning.md); saldo/saque em [`tasks/task18-planning.md`](tasks/task18-planning.md).
 
 ## Glossário de Domínio
 
