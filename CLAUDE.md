@@ -87,6 +87,13 @@ Todo admin do backoffice pode gerar um **link de indicação**. Quando outro adm
 
 Detalhes técnicos do fluxo (snapshot, cron, saque, webhook auth, edge cases) em [`ifute-core-simple/CLAUDE.md`](ifute-core-simple/CLAUDE.md). Planejamento: afiliação em [`tasks/task11-planning.md`](tasks/task11-planning.md); saldo/saque em [`tasks/task18-planning.md`](tasks/task18-planning.md).
 
+## Identidade Visual
+
+- **Verde de marca**: `#32E75F` (verde vivo do logo) — cor principal do ecossistema. Em HSL ≈ `hsl(135 79% 55%)`; sobre fundos claros, use uma variante levemente escurecida (`hsl(142 72% 38%)`) para garantir contraste AA.
+- **Ambiente escuro**: `#05230C` (mais escuro: `#001004`) — fundo das seções de destaque ("ink").
+- **Tipografia**: Inter.
+- **Fonte de verdade do tema**: `ifute-backoffice/src/index.css` (tokens estilo shadcn/ui, claro + escuro). A `ifute-landing-page` deriva sua paleta desses mesmos tokens.
+
 ## Glossário de Domínio
 
 | Termo (EN) | Termo (PT) | Descrição |
