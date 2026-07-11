@@ -28,6 +28,10 @@ Cada subdiretório é um repositório Git independente. Consulte o CLAUDE.md de 
 - Priorize simplicidade e eficiência; não introduza microsserviços ou complexidade desnecessária
 - Banco de dados: PostgreSQL (único, compartilhado)
 
+## Testes em Produção
+
+Por convenção, **Places de teste criados em produção usam coordenadas fixas no meio do Atlântico Sul** (lat `-54.441196`, lon `-36.554195` — campos `lat`/`lon` de `PlaceLocation`). O ponto é deliberadamente remoto (ninguém mora por perto), então quadras ali nunca aparecem em buscas de usuários reais, permitindo validar fluxos em produção sem poluir a experiência de ninguém. Ao analisar dados de prod, Places nessas coordenadas podem ser tratados como dados de teste.
+
 ## Portas e Domínios
 
 Mesmas portas são usadas localmente e em produção (nginx faz reverse proxy por subdomínio via HTTPS):
