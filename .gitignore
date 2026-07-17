@@ -1,6 +1,7 @@
 # Repositórios embutidos (cada um tem seu próprio git)
 ifute/
 ifute-backoffice/
+ifute-master-backoffice/
 ifute-compose/
 ifute-core-simple/
 ifute-docs/

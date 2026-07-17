@@ -10,6 +10,7 @@ Este é um meta-repositório que organiza todos os projetos como subdiretórios:
 |---|---|---|
 | `ifute/` | App mobile (usuários finais) | React Native / Expo |
 | `ifute-backoffice/` | Painel admin (donos de quadra) | React (web) |
+| `ifute-master-backoffice/` | Backoffice mestre da diretoria — painel global (Task 23). Ferramenta **local**, roda em `localhost:7104` e bate na API de prod | React 19 / Vite (web) |
 | `ifute-core-simple/` | Backend principal (API + regras de negócio) | TypeScript, Express, TypeORM, PostgreSQL |
 | `ifute-landing-page/` | Landing page de captação | Web |
 | `ifute-docs/` | Termos de uso e documentos legais | — |
@@ -42,8 +43,11 @@ Mesmas portas são usadas localmente e em produção (nginx faz reverse proxy po
 | `7101` | `ifute-backoffice` (painel admin) | `backoffice.ifute.com.br` |
 | `7102` | `ifute-docs` (documentos) | `docs.ifute.com.br` |
 | `7103` | `ifute-landing-page` (landing) | `ifute.com.br` |
+| `7104` | `ifute-master-backoffice` (backoffice mestre da diretoria) | — (sem deploy/domínio: roda em `localhost:7104`, batendo na API de prod) |
 
 Configuração nginx: `ifute-compose/nginx/conf.d/default.conf`
+
+> **`7104` não passa pelo nginx nem tem domínio.** O master-backoffice é uma ferramenta local da diretoria; o backend expõe o app dedicado `backoffice-director` (prefixo `/director`) cujo CORS libera a origem `http://localhost:7104`. Por isso o `release.sh` não o inclui e ele não aparece no `docker-compose.yml`.
 
 ## Deploy
 
