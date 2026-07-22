@@ -47,8 +47,24 @@ em paralelo (em prd `RUN_MIGRATIONS_ON_BOOT=false`, sem race) e mantém debug si
 4. **Validar**: logs mostram "forking 3 workers" + 3 "listening"; `docker stats` do core deve passar de ~130% para perto de 300%+ sob carga.
 5. **Re-rodar o teste de carga** (`load-test/`) para medir o novo teto e comparar.
 
-## Próximo teto esperado
+## Resultado (deployado 2026-07-22 — 0.3.3, 3 workers)
 
-Com o core usando ~todos os cores, o próximo limite tende a ser o **Postgres
-(100 conns)** ou a **query do `discover`**. Reavaliar após o deploy + re-teste.
-Cache de leitura (CDN/HTTP) segue como alavanca adicional (recomendação #4 do relatório).
+Deploy concluído: `CLUSTER_WORKERS=3`, `DB_POOL_MAX=10`, `mem_limit=1g`.
+Re-teste de carga (mesmo método do baseline) confirmou a melhoria:
+
+| Métrica | Baseline (1 proc) | Cluster (3 workers) |
+|---|---|---|
+| Throughput útil | ~77 req/s | **~146 req/s** (+90%) |
+| p95 latência | 19,4 s | **5,6 s** (−71%) |
+| Falhas | 37% | **20%** |
+| CPU do core | ~1,2 core | **~2,4 cores** |
+
+**Novo gargalo: CPU do Postgres** (query geo do `discover` satura ~1 core) +
+saturação do box (load ~8/4 cores). NÃO é conexões (36/100) nem RAM.
+
+## Próxima alavanca
+
+Não são mais workers — o limite virou **CPU de query**. Prioridade agora:
+**cache de leitura** (`discover`/detalhes, recomendação #4/#6 do baseline) e
+otimizar a query. Comparativo completo:
+[`load-test/results/RELATORIO-cluster-2026-07-22_2025Z.md`](../load-test/results/RELATORIO-cluster-2026-07-22_2025Z.md).
