@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssh -p 51765 -o BatchMode=yes root@api.ifute.com.br 'cd $\\(find /root -maxdepth 3 -name docker-compose.yml -path '\\\\''*compose*'\\\\'' 2>/dev/null | head -1 | xargs dirname\\); docker compose exec -T postgresdb sh -c '\\\\''psql -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\" -P pager=off -c \" *)",
+      "Bash(awk '/static async.*\\\\{/,/^  \\\\}/' /Users/gabao/repos/ifute-ecossystem/ifute-core-simple/src/apps/mobile/services/place.service.ts)",
+      "Bash(docker info *)",
+      "Read(//Applications/Docker.app/**)",
+      "Bash(docker version *)",
+      "Bash(ssh -p 51765 -o ConnectTimeout=15 root@api.ifute.com.br 'docker ps --filter name=ifute-core-simple --format '\\\\''{{.Names}} | {{.Image}} | {{.Status}}'\\\\''')",
+      "Bash(ssh -p 51765 -o ConnectTimeout=15 root@api.ifute.com.br 'docker logs --tail 25 ifute-core-simple 2>&1')",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code} tempo=%{time_total}s\\\\n\" --max-time 15 https://api.ifute.com.br/)",
+      "Bash(node -e ' *)",
+      "Bash(node --input-type=module -e ' *)",
+      "Bash(./scripts/release.sh ifute-backoffice *)",
+      "Bash(ssh -p 51765 -o ConnectTimeout=15 root@api.ifute.com.br \"docker ps --filter name=ifute-backoffice --format '{{.Names}} | {{.Image}} | {{.Status}}'\")",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code} tempo=%{time_total}s\\\\n\" --max-time 15 https://backoffice.ifute.com.br/)",
+      "Bash(docker-compose version *)",
+      "Bash(ls -la tools/)",
+      "Bash(ls -la tools/asaas-notifications/)",
+      "Bash(chmod +x /private/tmp/claude-501/-Users-gabao-repos-ifute-ecossystem/8229a61d-a9ce-4276-b3d3-d59850b1d859/scratchpad/check-asaas-notifications.sh)",
+      "Bash(bash -n /private/tmp/claude-501/-Users-gabao-repos-ifute-ecossystem/8229a61d-a9ce-4276-b3d3-d59850b1d859/scratchpad/check-asaas-notifications.sh)",
+      "Bash(chmod +x /Users/gabao/repos/ifute-ecossystem/scripts/check-asaas-notifications.sh)",
+      "Bash(bash -n /Users/gabao/repos/ifute-ecossystem/scripts/check-asaas-notifications.sh)",
+      "Bash(ssh -p 51765 -o BatchMode=yes -o ConnectTimeout=10 root@api.ifute.com.br bash -s)",
+      "Bash(grep -nA1 \"pix_qr_code\\\\|pix_copy_paste\\\\|pix_due_date\\\\|provider_payment_id\\\\|provider_card_token\\\\|cash_capture_status\" src/shared/database/entities/courtAppointmentOrder.entity.ts)",
+      "Bash(grep -rn \"waiting_payment\\\\|softCancelPayment\\\\|expire\\\\|expir\\\\|unpaid\\\\|generate_cancellations\\\\|due_date\\\\|dueDate\" src/apps --include-dir=.)",
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)",
+      "Bash(grep -n \"from \\\\\"../utils\\\\\"\\\\|deriveOrderDisplayStatus\\\\|isOrderRecurrent\\\\|aggregatedRecurrentAppointmentsWithOrder\\\\|import {\" src/apps/mobile/services/place.service.ts)",
+      "Bash(echo \"versão: $\\(node -p \"require\\('./package.json'\\).version\"\\)\")",
+      "WebSearch"
+    ]
+  }
+}

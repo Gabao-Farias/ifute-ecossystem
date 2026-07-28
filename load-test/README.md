@@ -15,6 +15,7 @@ Asaas, não escreve no banco.
 |---|---|
 | `read-path.js` | Script k6 — rampa de req/s até saturar, mix ponderado dos 4 endpoints de leitura |
 | `monitor-host.sh` | Coletor de CPU/mem/Docker/Postgres, roda na VPS via SSH em paralelo |
+| `usage-profile.md` | Perfil de uso real por usuário (req/s por usuário) — base para traduzir throughput em nº de usuários suportados |
 
 ## Por que não dá pra só "mandar k6 na prod"
 

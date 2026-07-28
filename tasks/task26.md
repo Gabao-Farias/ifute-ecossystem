@@ -68,3 +68,11 @@ Não são mais workers — o limite virou **CPU de query**. Prioridade agora:
 **cache de leitura** (`discover`/detalhes, recomendação #4/#6 do baseline) e
 otimizar a query. Comparativo completo:
 [`load-test/results/RELATORIO-cluster-2026-07-22_2025Z.md`](../load-test/results/RELATORIO-cluster-2026-07-22_2025Z.md).
+
+## Capacidade em nº de usuários
+
+Para traduzir o teto de throughput (req/s) em usuários suportados, ver o perfil
+de uso real derivado de sessão do app em
+[`load-test/usage-profile.md`](../load-test/usage-profile.md): **~0,29 req/s por
+usuário ativo** → cluster comporta ~**500–700 usuários em uso contínuo**
+(alguns milhares com o padrão real rajada+pausa).
