@@ -242,6 +242,7 @@ Ordenados por relação valor/esforço.
 **Impacto:** o core roda em **cluster de N workers** (task 26), todos escrevendo no mesmo stdout. Linhas de log da mesma requisição não podem ser agrupadas, e não há como saber qual worker atendeu o quê.
 **Correção:** gerar um `X-Request-Id` (ou aceitar o do nginx) e incluí-lo em toda linha de log, junto do `process.pid`.
 **Esforço:** médio.
+**Status:** ✅ implementado em 09/08/2026 ([core-simple#116](https://github.com/Gabao-Farias/ifute-core-simple/pull/116), [compose#15](https://github.com/Gabao-Farias/ifute-compose/pull/15)). Metade já estava pronta: o `process.pid` o pino **já emitia** por padrão em `prd` — confirmado nos três workers em produção. Para o id de correlação, o nginx tem `$request_id` nativo, então não houve id a inventar; o trabalho real foi propagá-lo aos ~90 pontos de log sem passá-lo como parâmetro em todos, resolvido com `AsyncLocalStorage` + o `mixin` do pino. Medido: ~6% de throughput em benchmark sintético, ~7 µs por requisição — ~0,1% de um core no teto real da infra.
 
 ### G7 — Sem métrica de latência
 **Impacto:** o `log_format main` do nginx é o padrão de fábrica: não inclui `$request_time` nem `$upstream_response_time`. Não há dado de performance por rota em produção — o que é especialmente relevante dado o gargalo de CPU já identificado no teste de carga.
@@ -273,28 +274,29 @@ Ordenados por relação valor/esforço.
 
 4. ✅ **Feito (09/08/2026).** Implementar **G1 + G2 + G3 juntos** — mesma região de código, mesmo deploy, e juntos transformam o log de "quem bateu na API" em "quem procurou o quê, onde, e achou quantos resultados".
 5. ✅ **Feito (09/08/2026).** **G7** é uma linha de configuração no nginx; fazer no próximo `deploy-prd.sh`.
-6. **G8** (tabela de eventos) e **G9** (analytics) merecem decisão à parte, com implicação de privacidade.
+6. ✅ **Feito (09/08/2026).** **G6** foi junto, por ser o que amarra os outros: sem id de correlação, as linhas novas continuariam soltas entre os workers.
+7. **G8** (tabela de eventos) e **G9** (analytics) merecem decisão à parte, com implicação de privacidade.
 
 ---
 
 ## 10. Follow-up — o que foi implementado
 
-Em 09/08/2026, **G1, G2, G3 e G7** foram implementados (PRs [core-simple#114](https://github.com/Gabao-Farias/ifute-core-simple/pull/114) e [compose#14](https://github.com/Gabao-Farias/ifute-compose/pull/14)). Continuam **abertos**: G4, G5, G6, G8 e G9 — e, mais importante que todos eles, a ação nº 1 da seção 9: **cadastrar quadras reais**. Nenhuma instrumentação muda o fato de que hoje 100% dos usuários reais veem tela vazia.
+Em 09/08/2026, **G1, G2, G3, G6 e G7** foram implementados e estão em produção (core `0.3.6`). Documentação completa da implementação — decisões, armadilhas, custo medido — em [`tasks/task30.md`](../tasks/task30.md).
+
+Continuam **abertos**: G4, G5, G8 e G9 — e, mais importante que todos eles, a ação nº 1 da seção 9: **cadastrar quadras reais**. Reconfirmado após o deploy: `discover` com coordenadas de São Paulo devolve `places_in_radius: 0`. Nenhuma instrumentação muda o fato de que hoje 100% dos usuários reais veem tela vazia — o que ela dá agora é o mapa de onde essa demanda está.
 
 O log de acesso da API passa a ter este formato (campos ausentes são omitidos pelo pino):
 
-```json
-{"ip":"189.40.69.84","path":"/mobile/private/user","method":"GET","status":200,
- "duration_ms":12,"user_id":"ea6da5d5-…","lat":-23.56,"lon":-46.66,"tz_offset":180,
- "msg":"Request completed"}
+```
+# nginx
+189.7.228.9 - - [09/Aug/2026:16:59:05 +0000] "GET /mobile/public/place/discover HTTP/1.1" 200 2 "-" "curl/8.7.1" "-" rt=0.029 urt="0.030" rid=d1319181f36a2b02ccae140286eae196
+
+# core — mesma requisição, mesmo worker, duas linhas amarradas pelo request_id
+{"pid":20,"request_id":"d1319181f36a2b02ccae140286eae196","event":"place_discover","lat":-23.56,"lon":-46.66,"tz_offset":180,"places_in_radius":0,"eligible":0,"results":0,"msg":"place_discover"}
+{"pid":20,"request_id":"d1319181f36a2b02ccae140286eae196","ip":"189.7.228.9","path":"/mobile/public/place/discover","method":"GET","status":200,"duration_ms":29,"lat":-23.56,"lon":-46.66,"tz_offset":180,"msg":"Request completed"}
 ```
 
-E as buscas passam a emitir o evento de funil:
-
-```json
-{"event":"place_discover","lat":-23.56,"lon":-46.66,"tz_offset":180,
- "places_in_radius":0,"eligible":0,"results":0,"msg":"place_discover"}
-```
+O `request_id` volta ao cliente no header `X-Request-Id`, então um erro reportado por usuário vira um `grep` exato.
 
 **Consultas que passam a ser possíveis** — todas exigiam, antes, a inferência temporal da seção 2:
 
@@ -312,6 +314,10 @@ for line in sys.stdin:
     except ValueError: continue
     if d.get("lat") is not None: c[(d["lat"], d["lon"])] += 1
 for (lat, lon), n in c.most_common(20): print(f"{n:5d}  {lat},{lon}")'
+
+# Uma requisição inteira, da borda ao core
+docker logs nginx_proxy       2>&1 | grep '<request_id>'
+docker logs ifute-core-simple 2>&1 | grep '"request_id":"<request_id>"'
 
 # Rotas mais lentas (nginx; urt = tempo gasto pelo backend)
 docker logs nginx_proxy 2>&1 | grep -o 'urt="[0-9.]*"' | sort -t'"' -k2 -rn | head
