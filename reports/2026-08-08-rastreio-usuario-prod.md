@@ -214,16 +214,19 @@ Ordenados por relação valor/esforço.
 **Impacto:** impossível responder "o que este usuário fez?" sem inferência temporal por IP. O método usado nesta análise só funcionou porque havia 2 IPs ativos no dia; não escala.
 **Correção:** incluir `req.user?.sub` no log das rotas autenticadas. O `loggerMiddleware` é global e roda antes do `authenticateToken`, então precisa de um segundo middleware após a autenticação, ou de leitura tardia via `res.on("finish")`.
 **Esforço:** baixo.
+**Status:** ✅ implementado em 09/08/2026 ([core-simple#114](https://github.com/Gabao-Farias/ifute-core-simple/pull/114)). A linha passou a ser emitida no fim da requisição (`res.on("close")`), o que também trouxe `status`, `duration_ms` e `aborted`. **Ressalva:** `/place/discover` e `/place/city` são rotas públicas — o app as chama mesmo logado, então continuam sem `user_id`.
 
 ### G2 — Headers de geolocalização descartados
 **Impacto:** não se sabe de onde vem a demanda. Cada busca vazia é um sinal de mercado perdido.
 **Correção:** logar `lat`/`lon` **arredondados a 2 casas decimais** (~1 km de precisão) e `timezoneoffset` nas rotas que já os recebem. O arredondamento não é preciosismo: coordenada exata de pessoa física é dado pessoal sob LGPD e iria para log de container. Resolver para nome de cidade na análise, não no caminho da requisição — já existe reverse geocoding no projeto ([`APILocation`](../ifute-core-simple/src/shared/api/location.ts), OpenWeatherMap), mas chamá-lo por requisição adicionaria latência e custo.
 **Esforço:** baixo. **Maior retorno de negócio do conjunto.**
+**Status:** ✅ implementado em 09/08/2026 ([core-simple#114](https://github.com/Gabao-Farias/ifute-core-simple/pull/114)), com o arredondamento a 2 casas como recomendado.
 
 ### G3 — Buscas vazias não são medidas
 **Impacto:** a métrica mais importante do estágio atual do produto — "quantas pessoas procuraram quadra e não acharam nada, e onde" — não existe. Nesta análise, só foi possível detectar o resultado vazio porque o nginx registra `$body_bytes_sent` e `[]` tem 2 bytes. É forense, não observabilidade.
 **Correção:** logar a contagem de resultados em `discover` e `city` (ex.: `logger.info({ user_id, lat, lon, results: places.length }, "place_discover")`). Um contador de `results: 0` por região passa a ser o mapa de prospecção de quadras.
 **Esforço:** baixo.
+**Status:** ✅ implementado em 09/08/2026 ([core-simple#114](https://github.com/Gabao-Farias/ifute-core-simple/pull/114)), com **três** contagens em vez de uma — `places_in_radius`, `eligible` e `results`. A separação importa: `places_in_radius = 0` é falta de oferta (cadastrar quadra), enquanto `eligible = 0` com `places_in_radius > 0` é falta de ativação (dono sem chave PIX, place fechado no dia). E no `discover` o retorno é uma amostra aleatória de até 3 places, então `results` sozinho subnotificaria — quem responde "viu tela vazia?" é `eligible`.
 
 ### G4 — Eventos de autenticação não são logados
 **Impacto:** o cadastro deste usuário só foi detectável pelo `created_at` na tabela `user`. Não há registro de logins bem-sucedidos, tentativas falhas, ou distinção entre primeiro login e login recorrente. `auth.service.ts` não usa o logger.
@@ -244,6 +247,7 @@ Ordenados por relação valor/esforço.
 **Impacto:** o `log_format main` do nginx é o padrão de fábrica: não inclui `$request_time` nem `$upstream_response_time`. Não há dado de performance por rota em produção — o que é especialmente relevante dado o gargalo de CPU já identificado no teste de carga.
 **Correção:** adicionar `$request_time` e `$upstream_response_time` ao `log_format` em `ifute-compose/nginx/`. Mudança de configuração, aplicável via `deploy-prd.sh`.
 **Esforço:** trivial.
+**Status:** ✅ implementado em 09/08/2026 ([compose#14](https://github.com/Gabao-Farias/ifute-compose/pull/14)). Menos trivial do que parecia: o `include` do `http{}` resolve o glob em ordem alfabética, então o `log_format` precisou ir para um arquivo com prefixo numérico (`00-logging.conf`) para ser lido antes do `default.conf`; e o `access_log` teve que ser declarado por server block, porque redeclará-lo no `http{}` **soma** um segundo destino em vez de substituir o da imagem — cada requisição sairia duplicada.
 
 ### G8 — Retenção curta e sem histórico durável
 **Impacto:** a janela de investigação é acidental. O log do core cobria **apenas desde 05/08 14:43** (container recriado, arquivo único de 15 MB, ainda sem rotação). O do nginx cobria desde ~09/07 (`50m` × 4 arquivos, 186 MB). Este usuário se cadastrou no mesmo dia da análise — foi sorte. Um cadastro de 20 dias antes teria deixado rastro parcial; de 40 dias, nenhum.
@@ -267,9 +271,53 @@ Ordenados por relação valor/esforço.
 
 **Sobre o rastreio:**
 
-4. Implementar **G1 + G2 + G3 juntos** — mesma região de código, mesmo deploy, e juntos transformam o log de "quem bateu na API" em "quem procurou o quê, onde, e achou quantos resultados".
-5. **G7** é uma linha de configuração no nginx; fazer no próximo `deploy-prd.sh`.
+4. ✅ **Feito (09/08/2026).** Implementar **G1 + G2 + G3 juntos** — mesma região de código, mesmo deploy, e juntos transformam o log de "quem bateu na API" em "quem procurou o quê, onde, e achou quantos resultados".
+5. ✅ **Feito (09/08/2026).** **G7** é uma linha de configuração no nginx; fazer no próximo `deploy-prd.sh`.
 6. **G8** (tabela de eventos) e **G9** (analytics) merecem decisão à parte, com implicação de privacidade.
+
+---
+
+## 10. Follow-up — o que foi implementado
+
+Em 09/08/2026, **G1, G2, G3 e G7** foram implementados (PRs [core-simple#114](https://github.com/Gabao-Farias/ifute-core-simple/pull/114) e [compose#14](https://github.com/Gabao-Farias/ifute-compose/pull/14)). Continuam **abertos**: G4, G5, G6, G8 e G9 — e, mais importante que todos eles, a ação nº 1 da seção 9: **cadastrar quadras reais**. Nenhuma instrumentação muda o fato de que hoje 100% dos usuários reais veem tela vazia.
+
+O log de acesso da API passa a ter este formato (campos ausentes são omitidos pelo pino):
+
+```json
+{"ip":"189.40.69.84","path":"/mobile/private/user","method":"GET","status":200,
+ "duration_ms":12,"user_id":"ea6da5d5-…","lat":-23.56,"lon":-46.66,"tz_offset":180,
+ "msg":"Request completed"}
+```
+
+E as buscas passam a emitir o evento de funil:
+
+```json
+{"event":"place_discover","lat":-23.56,"lon":-46.66,"tz_offset":180,
+ "places_in_radius":0,"eligible":0,"results":0,"msg":"place_discover"}
+```
+
+**Consultas que passam a ser possíveis** — todas exigiam, antes, a inferência temporal da seção 2:
+
+```sh
+# Tudo que um usuário fez
+docker logs ifute-core-simple 2>&1 | grep '"user_id":"<uuid>"'
+
+# Mapa de demanda não atendida: onde as pessoas procuram e não acham nada
+docker logs ifute-core-simple 2>&1 \
+  | grep '"event":"place_' | grep '"eligible":0' \
+  | python3 -c 'import sys, json, collections
+c = collections.Counter()
+for line in sys.stdin:
+    try: d = json.loads(line)
+    except ValueError: continue
+    if d.get("lat") is not None: c[(d["lat"], d["lon"])] += 1
+for (lat, lon), n in c.most_common(20): print(f"{n:5d}  {lat},{lon}")'
+
+# Rotas mais lentas (nginx; urt = tempo gasto pelo backend)
+docker logs nginx_proxy 2>&1 | grep -o 'urt="[0-9.]*"' | sort -t'"' -k2 -rn | head
+```
+
+O ponto cego que **permanece**: `discover` e `city` são rotas públicas e seguem sem `user_id` mesmo com o usuário logado — dá para saber *de onde* veio a busca vazia, não *de quem*. Fechar isso exigiria decodificar o JWT sem verificar (dado não confiável em log) ou mover as rotas para `private`.
 
 ---
 
