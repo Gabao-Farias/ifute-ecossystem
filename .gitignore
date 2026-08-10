@@ -5,6 +5,8 @@ ifute-master-backoffice/
 ifute-compose/
 ifute-core-simple/
 ifute-docs/
+# Contém os .env de produção — nunca deve ser commitado aqui.
+ifute-envs/
 ifute-iptabler/
 ifute-landing-page/
 ifute-jobber/

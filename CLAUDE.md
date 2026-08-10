@@ -28,6 +28,7 @@ Cada subdiretório é um repositório Git independente. Consulte o CLAUDE.md de 
 - **Desenvolvimento local em WSL2** — para expor as portas à rede local (testes em dispositivos móveis etc.), rodar `scripts/wsl-expose-ports.ps1` como admin no PowerShell do Windows. Precisa rodar novamente após cada reinício do WSL (IP muda)
 - Priorize simplicidade e eficiência; não introduza microsserviços ou complexidade desnecessária
 - Banco de dados: PostgreSQL (único, compartilhado)
+- **Logs**: todos os containers usam o driver `journald`, então o histórico sobrevive a releases e reboots (~28 dias, teto de 250 MB). Ler com `journalctl CONTAINER_TAG=ifute-core-simple --since "5 days ago" -o cat`. Detalhes em [`ifute-compose/README.md`](ifute-compose/README.md#logs)
 
 ## Testes em Produção
 
@@ -61,6 +62,20 @@ Há **dois tipos de deploy**, intencionalmente separados (rodar de dentro de `if
 | Compose, nginx ou `.env*` | `./scripts/deploy-prd.sh` | Envia **só a configuração** e recria os containers com as imagens já presentes |
 
 Apps válidos para `release.sh`: `ifute-core-simple`, `ifute-backoffice`, `ifute-jobber`, `ifute-docs`, `ifute-landing-page`.
+
+### Arquivos `.env` do deploy — `ifute-envs/`
+
+Os `.env` de produção **não são versionados** no `ifute-compose/`. Ficam no repositório privado [`ifute-envs`](https://github.com/Gabao-Farias/ifute-envs) (`git@github.com:Gabao-Farias/ifute-envs.git`), clonado como `ifute-envs/` neste meta-repositório.
+
+O `deploy-prd.sh` aborta se estes três não existirem na raiz do `ifute-compose/`:
+
+| Arquivo | Conteúdo | Fonte de verdade |
+|---|---|---|
+| `.env.ifute-core-simple` | segredos do backend + Postgres | `ifute-envs/` |
+| `.env.ifute-jobber` | segredos dos cron jobs | `ifute-envs/` |
+| `.env` | **tags das imagens** (`*_TAG`) | `ifute-compose/` local |
+
+> ⚠️ **Não copie o `.env` do `ifute-envs/` por cima.** Diferente dos outros dois, ele é reescrito pelo `release.sh` a cada release (sincroniza a `*_TAG`), então a cópia no `ifute-envs/` fica defasada e sobrescrevê-la causa **rollback silencioso de versão** no próximo `deploy-prd.sh`. Em 10/08/2026 o `ifute-envs/.env` apontava `IFUTE_CORE_SIMPLE_TAG=0.3.5` enquanto produção rodava `0.3.6`. Antes de copiar qualquer `.env`, compare com o que está rodando: `ssh -p 51765 root@api.ifute.com.br 'docker ps --format "{{.Names}}\t{{.Image}}"'`.
 
 Pontos de atenção:
 
