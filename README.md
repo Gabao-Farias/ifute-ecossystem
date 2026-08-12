@@ -89,8 +89,9 @@ Isso significa que se um cliente agendar um horário para jogar das 14:00 às 15
 
 #### Asaas API
 
-* Pix (recebido): ~R$ 1,99 por transação
-* Cartão de crédito: À vista: ~R$ 0,49 + 2,99% Parcelado: até ~4,29% + R$ 0,49
+* Pix (recebido): ~R$ 1,99 por cobrança — **único meio de pagamento em produção**
+* Pix (saque/repasse de saída): R$ 2,00 por saque
+* ~~Cartão de crédito~~: desligado. O caminho existe no código (legado das tasks 3/6), mas a flag `useCreditCardPayment` do Remote Config é `false` e nenhum cálculo comercial deve considerá-lo
 
 #### Comissão de Venda
 
