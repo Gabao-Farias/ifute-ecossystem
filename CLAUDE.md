@@ -87,10 +87,10 @@ Pontos de atenção:
 
 - Taxa da plataforma: R$ 4,99 por bloco de 30 min reservado (`tax_value_per_time_block`)
 - Gateway de pagamento: Asaas API (via abstração `PaymentProvider` — backend agnóstico a provider, mas hoje só Asaas está plugado)
-  - **PIX IN** (recebimento da cobrança): ~R$ 1,99/transação
-  - Cartão à vista: ~R$ 0,49 + 2,99%
-  - Cartão parcelado: até ~4,29% + R$ 0,49
+  - **PIX é o único meio de pagamento em produção.** Cartão de crédito está desligado: o app só renderiza os meios liberados pelas flags de Firebase Remote Config, e `useCreditCardPayment` tem default `false` (`ifute/src/services/remoteConfig.ts`). Todo cálculo de custo, precificação e material comercial deve assumir **somente PIX**
+  - **PIX IN** (recebimento da cobrança): ~R$ 1,99 **por cobrança** (não por bloco). **Repassado ao cliente final, não descontado da taxa da plataforma** — `finalValue = netValue + (taxa × blocos) + 1,99` (`calculateAsaasPixCostBreakdown`). Logo a margem da plataforma é constante em `tax_value_per_time_block` por bloco, independente da duração da reserva; quem se beneficia de reserva longa é o **jogador**, que dilui o R$ 1,99 fixo em mais blocos
   - **PIX OUT** (saque/repasse de saída): R$ 2,00 por saque — taxa **distinta** do PIX IN, configurável em `BusinessConfig.withdrawal_fee_cents`, descontada de quem saca (Task 18)
+  - O caminho de cartão **ainda existe no código** (`AsaasProvider.createCreditCardPayment`, e o `createAuthorizedPayment` cai em `credit-card` quando `paymentMethod` não é informado). É legado das tasks 3/6 — não construa nada novo sobre ele e sempre passe `paymentMethod: "pix"` explicitamente
 - Comissão de venda: 30% por transação
 - Lógica de precificação: o administrador define quanto quer receber, e as taxas são repassadas ao cliente final
 
