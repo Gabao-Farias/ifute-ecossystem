@@ -71,7 +71,15 @@ Três consequências práticas:
 
 ---
 
-## Como atualizar
+## ⚠️ Este arquivo virou histórico
+
+Desde a **task 32 (fases 2 e 3)**, o mapa de demanda é uma **tela**, não um markdown: `/dashboard/demand` no `ifute-master-backoffice` (`localhost:7104`), servida por `GET /director/private/reports/demand`. Ela mostra o mesmo que a tabela abaixo — buscas, buscas vazias, indicações e cadastros por região — só que sempre atualizada, com o funil de reservas junto, e sem depender de ninguém lembrar de editar.
+
+**O que fazer com este arquivo:** mantenha-o pelos **pontos anteriores a 17/08/2026**, que a tabela `business_event` não tem e nunca terá — ela começou a gravar em 17/08 e os logs que os continham já rolaram. Em especial os pontos **5 e 6** (o cadastro de 08/08 sem localização e a região de Santo Ângelo), que só existem aqui.
+
+Para pontos novos, **use a tela**. Não vale a pena manter duas verdades.
+
+## Como atualizar (histórico — preferir a tela)
 
 1. Gere o relatório da janela: `node scripts/analyze-prod-logins.mjs --since "7 days ago"` → grava em [`historico/`](historico/).
 2. Olhe a **seção 5 (Localizações agregadas)** do relatório novo.
@@ -104,9 +112,10 @@ for (lat, lon, elig), n in c.most_common(): print(f"{n:5d}  {lat},{lon}  eligibl
 
 | # | O quê | Impacto aqui |
 |---|---|---|
-| **G8** | Eventos de negócio em tabela no Postgres, não em log de container | Acabaria com a perda de sinal por rotação. **A pendência mais relevante para este documento** |
+| ~~**G8**~~ | ~~Eventos de negócio em tabela no Postgres~~ | ✅ **Resolvido** na task 32 (17/08/2026). A tabela `business_event` grava busca, indicação, cadastro e reserva; a perda de sinal por rotação acabou daqui para frente |
 | — | Reduzir o volume do jobber no log (41% dos bytes) | Multiplicaria a janela de retenção sem tocar em infra |
 | **G2+** | `discover` e `city` são rotas **públicas** — não carregam `user_id` mesmo com o usuário logado | Dá para saber *de onde* veio a busca vazia, não *de quem*. Todo rastreio individual exige reconstruir a sessão por IP |
-| — | Bug do `400` na primeira chamada de `discover` de todo cliente | Requisições que falham **não emitem** `place_discover` — quem desistir nesse ~1 segundo fica invisível neste mapa |
+| — | Bug do `400` na primeira chamada de `discover` de todo cliente | Requisições que falham **não emitem** `place_search` — quem desistir nesse ~1 segundo fica invisível no mapa. **Segue aberto** |
+| — | Tela vazia no app que consome `POST /place/suggestion` | O backend está pronto desde a task 32; sem a tela, o evento `place_suggestion` nunca é disparado e a coluna "Indicações" fica sempre zerada |
 
 Detalhamento dos gaps em [`2026-08-08-rastreio-usuario-prod.md`](historico/2026-08-08-rastreio-usuario-prod.md) (seção 8) e do bug do `400` em [`2026-08-16-rastreio-usuario-prod.md`](historico/2026-08-16-rastreio-usuario-prod.md) (seção 5).

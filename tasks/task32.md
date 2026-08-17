@@ -85,7 +85,10 @@ Perda aceita: um insert em voo se perde se o worker morrer. É analítica, não 
 - [x] Gravar `user_signup` / `user_login` no login mobile (Google e Apple)
 - [x] Unit specs do builder de linha
 - [x] Documentar em `ifute-core-simple/CLAUDE.md` (seção Observabilidade)
-- [ ] **Aplicar a migration num Postgres** (`up` + `revert` + `up`) — ⚠️ **ainda não verificado**, ver "Estado" abaixo
+- [x] **Aplicar a migration num Postgres** (`up` + `revert` + `up`) — ver "Estado" abaixo
+- [x] **Deploy em produção** — `0.3.8`, migration aplicada em 17/08/2026
+
+**Fase 1 concluída.** As fases 2 e 3 continuam abertas.
 
 #### Nota de implementação: `save` em vez de `insert`
 
@@ -95,39 +98,63 @@ O `insert` do TypeORM exige `QueryDeepPartialEntity`, que mapeia recursivamente 
 
 `generateGoogeAuthResponseTokenPayload` e `generateAppleAuthResponseTokenPayload` passaram a devolver `{ payload, isNewUser }` em vez de só o payload. O `isNewUser` fica **fora** de `payload` de propósito: o payload é assinado no access token, e um campo analítico não tem por que viajar no JWT. Só os handlers do **mobile** mudaram — backoffice e director têm os seus próprios, fora do escopo.
 
-## Estado
-
-Implementado e verificado até onde a máquina local permite:
+## Estado — fase 1 em produção (17/08/2026)
 
 | Verificação | Resultado |
 |---|---|
 | `npx tsc --noEmit` | ✅ limpo |
 | `npm run test:unit` | ✅ 37 arquivos, 401 testes (era 36/396) |
-| Migration aplicada num banco | ❌ **não rodou** — sem Docker e sem Postgres local nesta máquina |
+| Migration `up` → `revert` → `up` | ✅ num Postgres 16.4 descartável |
+| Schema conferido | ✅ `numeric(6,2)`, `jsonb`, índice composto |
+| Round-trip entidade ↔ tabela | ✅ `lat` hidrata como `number` (`-22.96`), `payload.eligible: 0` preservado |
+| Deploy | ✅ `ifute-core-simple:0.3.8`, migration aplicada com backup |
+| Gravação em prod | ✅ evento real de app iOS, zero `business_event_write_failed` |
 
-A migration usa a mesma API (`Table` + `TableIndex`) da `1779000000011-PlatformWithdrawal`, e o `tsc` valida a forma das opções (`precision`/`scale` existem em `TableColumnOptions` no TypeORM 0.3.22) — mas **isso não substitui aplicá-la**. Rodar antes do release:
+A validação da migration usou um container descartável, sem tocar no banco de dev (que o `npm test` resetaria):
 
 ```sh
+docker run -d --name ifute-migcheck -e POSTGRES_USER=migcheck \
+  -e POSTGRES_PASSWORD=migcheck -e POSTGRES_DB=migcheck -p 55432:5432 postgres:16.4
+export POSTGRES_HOST=localhost POSTGRES_PORT=55432 POSTGRES_USER_NAME=migcheck \
+       POSTGRES_PASSWORD=migcheck POSTGRES_DATABASE_NAME=migcheck NODE_ENV=lcl
 npm run migrations:run && npm run migrations:revert && npm run migrations:run
 ```
 
-### Fase 2 — consumo (fora desta task)
+### Fase 2 — consumo ✅
 
-- Endpoint no `backoffice-director` (`/director/private/reports/demand`) com o mapa agregado
-- Tela de demanda no `ifute-master-backoffice`
-- Transformar o `reports/demanda-organica.md` de documento manual em consulta
+- [x] Endpoint no `backoffice-director` (`GET /director/private/reports/demand?days=30`, teto 365) com `points`, `totals` e `suggestions`
+- [x] Tela de demanda no `ifute-master-backoffice` (`/dashboard/demand`)
+- [x] `reports/demanda-organica.md` deixa de ser levantado à mão — vira leitura da tela
 
-### Fase 3 — o que a tabela habilita (fora desta task)
+**Agregação em SQL, não em JS.** O `director.service` carrega orders e soma em memória porque precisa reutilizar `computeOrderFinancials` (regra de negócio em JSON aninhado). Aqui não há regra a reutilizar — é `count(*) filter (...)` + `GROUP BY lat, lon` sobre colunas indexadas. Carregar linhas para contar só cresceria com o tempo sem ganho.
 
-- Eventos de order (`order_created`, `order_paid`, `order_canceled`) → funil de conversão real
-- `place_suggestion` — o "indique sua quadra" da tela vazia, que precisa exatamente desta tabela
-- Signup de admin (backoffice/director), hoje fora do escopo
+**Rótulo de região resolvido no backend** ([`cityLabel.ts`](../ifute-core-simple/src/shared/utils/helpers/cityLabel.ts)), tabela offline + haversine. Reverse geocoding por ponto custaria latência e cota para rotular dezenas de agregados, e a precisão guardada é ~1 km de todo modo. O `analyze-prod-logins.mjs` mantém a cópia dele para uso offline sem API — duplicação consciente, o backend é a fonte de verdade.
 
-## Escopo explicitamente fora
+### Fase 3 — cobertura do funil ✅
 
-- Retenção automática / job de limpeza. O volume não justifica ainda; a decisão de retenção deve ser tomada quando houver ordem de grandeza para ela.
-- Eventos de admin (backoffice e director têm handlers de auth próprios).
-- Qualquer coisa que grave log de acesso na tabela.
+- [x] Eventos de order (`order_created`, `order_paid`, `order_canceled`) com `reason` no cancelamento
+- [x] `place_suggestion` — `POST /mobile/public/place/suggestion`, rota pública, geolocalização opcional
+- [x] Signup/login de admin (`admin_signup`, `admin_login`) no backoffice e no director
+
+> **O buraco que motivou esta fase.** Em 17/08 às 09:17, logo após o deploy da fase 1, uma sessão de app iOS buscou quadras, **abriu duas delas e consultou preço** (`/payment/cost-breakdown`) — os passos mais próximos de uma reserva. Só a busca virou linha. Pelo `business_event` isolado, a sessão lia como "buscou e sumiu". Com os eventos de order, o funil passa a medir topo **e** fundo.
+
+**Decisões:**
+
+- **`recordOrderEvent` em vez de chamadas soltas.** São 5 call sites em 3 arquivos; payload montado à mão em cada um divergiria, e num registro append-only divergência é dado perdido, não bug corrigível.
+- **`reason` obrigatório no cancelamento.** Desistência de jogador, falha nossa ao materializar agendamento e estorno do provider têm naturezas opostas — somados na mesma contagem, o número não decide nada.
+- **Evento após o `commit`, nunca dentro da transação.** No cancelamento pelo app, emitir dentro do `try` deixaria evento fantasma num rollback.
+- **`place_suggestion` é rota pública com geo opcional.** 4 dos 6 pontos do mapa nunca criaram conta; exigir login perderia quem mais interessa. E quem negou a permissão de localização ainda indica — nome da quadra sozinho já é lead.
+- **`has_referrer` vem do retorno de `attachReferrerOnSignup`**, não de "veio código na URL": o método rejeita silenciosamente código inválido e auto-afiliação, então só o retorno diz se o padrinho existe de fato. Mede o funil de afiliação sem varrer o banco.
+
+### O que segue fora do escopo
+
+- **Tela vazia no app mobile** (`ifute/`) que consome o `POST /place/suggestion`. O backend está pronto e esperando; a tela é trabalho de produto/UX em outro repositório.
+- Job de retenção da tabela.
+- Eventos de saque/settlement.
+
+## A regra que não pode ser afrouxada
+
+**Só entra evento de negócio.** Baixo volume, alto valor por linha, consultado em meses. Log de acesso e tráfego de automação **não entram** — o `ifute-jobber` sozinho é ~41% do volume do log, e colocá-lo aqui faria da tabela um coletor de logs ruim dentro do Postgres. A retenção automática continua fora de escopo justamente porque, respeitada essa regra, o volume não a exige.
 
 ## Paliativo independente
 
