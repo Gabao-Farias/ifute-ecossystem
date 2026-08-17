@@ -61,6 +61,12 @@ const CITY_MATCH_RADIUS_KM = 60;
 /**
  * Tabela offline de cidades para rotular clusters de lat/lon.
  *
+ * ⚠️ Desde a task 32 a **fonte de verdade é o backend** (`labelCoordinate` em
+ * `ifute-core-simple/src/shared/utils/helpers/cityLabel.ts`), consumida pela
+ * tela de demanda do master-backoffice. A cópia aqui é deliberada: este script
+ * lê log cru por SSH e precisa rodar sem API nem banco. Ao acrescentar cidade
+ * em um dos dois, acrescente no outro.
+ *
  * Deliberadamente offline: reverse geocoding exigiria rede e cota da
  * OpenWeatherMap, e o log já vem arredondado a ~1 km (LGPD), o que torna
  * qualquer precisão maior do que "qual cidade/região" inútil de todo modo.
