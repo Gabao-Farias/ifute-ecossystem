@@ -139,7 +139,9 @@ Detalhes técnicos do fluxo (snapshot, cron, saque, webhook auth, edge cases) em
 - Idioma do código: inglês. Idioma de comunicação e documentação: português (BR)
 - Toda regra de negócio fica em `ifute-core-simple/` — nunca duplique lógica nos frontends
 - Tasks pendentes ficam em `tasks/`
-- Relatórios ficam em `reports/`, nomeados `AAAA-MM-DD-assunto.md` (data de geração primeiro, para ordenar cronologicamente por nome). Ex: `2026-08-08-rastreio-usuario-prod.md`
+- Relatórios ficam em `reports/`, divididos por tempo de vida:
+  - `reports/historico/` — **snapshots datados**, nomeados `AAAA-MM-DD-assunto.md` (data de geração primeiro, para ordenar cronologicamente por nome). Ex: `2026-08-08-rastreio-usuario-prod.md`. Retratam um momento e não são reescritos; é onde o `analyze-prod-logins.mjs` grava
+  - `reports/` (raiz) — **documentos vivos**, sem data no nome, atualizados conforme novos snapshots surgem. Ex: [`demanda-organica.md`](reports/demanda-organica.md), o mapa de onde há demanda real pelo app
 - Ao trabalhar em um subprojeto específico, leia o CLAUDE.md dele primeiro
 
 ## O que evitar

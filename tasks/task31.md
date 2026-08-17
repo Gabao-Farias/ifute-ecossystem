@@ -2,10 +2,10 @@
 
 ## Contexto
 
-Duas conclusões do plano de vendas ([`reports/2026-08-12-plano-vendas-donos-quadra.md`](../reports/2026-08-12-plano-vendas-donos-quadra.md)) exigem mudança em código e conteúdo:
+Duas conclusões do plano de vendas ([`reports/historico/2026-08-12-plano-vendas-donos-quadra.md`](../reports/historico/2026-08-12-plano-vendas-donos-quadra.md)) exigem mudança em código e conteúdo:
 
 1. **Pagamento é 100% PIX.** Cartão de crédito está desligado em produção (flag `useCreditCardPayment = false` no Remote Config), mas a landing, a metadata de SEO, as FAQs, os termos de uso e alguns defaults de código ainda anunciam ou assumem cartão. Quem chega pela landing lê uma promessa que o app não cumpre.
-2. **A landing promete demanda que ainda não existe.** A `/business` diz "coloque seu centro esportivo na frente de milhares de atletas". Produção não tem quadra real cadastrada e o `discover` devolve lista vazia ([`reports/2026-08-08-rastreio-usuario-prod.md`](../reports/2026-08-08-rastreio-usuario-prod.md)). Prometer audiência que não existe queima a credibilidade no primeiro follow-up de venda.
+2. **A landing promete demanda que ainda não existe.** A `/business` diz "coloque seu centro esportivo na frente de milhares de atletas". Produção não tem quadra real cadastrada e o `discover` devolve lista vazia ([`reports/historico/2026-08-08-rastreio-usuario-prod.md`](../reports/historico/2026-08-08-rastreio-usuario-prod.md)). Prometer audiência que não existe queima a credibilidade no primeiro follow-up de venda.
 
 Há também uma **correção de entendimento** que precisa ficar registrada porque afeta o que se comunica: o PIX IN (R$ 1,99) é **repassado ao cliente final**, não descontado da taxa da plataforma (`calculateAsaasPixCostBreakdown`: `finalValue = netValue + taxa × blocos + 1,99`). Logo:
 
