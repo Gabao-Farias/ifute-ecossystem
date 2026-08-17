@@ -2,7 +2,7 @@
 
 ## Origem
 
-O [relatório de rastreio de 2026-08-08](../reports/2026-08-08-rastreio-usuario-prod.md) tentou
+O [relatório de rastreio de 2026-08-08](../reports/historico/2026-08-08-rastreio-usuario-prod.md) tentou
 responder "o que este usuário fez na plataforma?" e só conseguiu por **inferência temporal**:
 casar o `created_at` da tabela `user` com o `POST /auth/login/google` no access log do nginx, e daí
 extrair a sessão pelo IP. Funcionou porque havia 2 IPs ativos no dia. Com tráfego real, não

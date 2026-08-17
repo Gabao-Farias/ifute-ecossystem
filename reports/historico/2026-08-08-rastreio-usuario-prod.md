@@ -22,7 +22,7 @@ Não é um caso de bug. É um caso de **ausência de oferta** — e o rastreio a
 
 Vale registrar porque a dificuldade aqui **é em si um achado**.
 
-O log de requisições do backend ([`loggerMiddleware`](../ifute-core-simple/src/shared/middlewares/log.ts), aplicado globalmente em [`app.ts:17`](../ifute-core-simple/src/app.ts#L17)) registra apenas `{ip, path}`:
+O log de requisições do backend ([`loggerMiddleware`](../../ifute-core-simple/src/shared/middlewares/log.ts), aplicado globalmente em [`app.ts:17`](../../ifute-core-simple/src/app.ts#L17)) registra apenas `{ip, path}`:
 
 ```ts
 logger.info({ ip, path }, "Incoming request");
@@ -145,7 +145,7 @@ Abandono por desinteresse acontece em 10–20 segundos. Cem segundos com zero co
 
 ## 6. Causa raiz do resultado vazio
 
-Não há defeito no código. O endpoint [`getCityPlacesSuggestions`](../ifute-core-simple/src/apps/mobile/services/place.service.ts#L123) filtra Places por raio de distância a partir do `lat`/`lon` do usuário e retorna `[]` quando nada é encontrado — comportamento correto.
+Não há defeito no código. O endpoint [`getCityPlacesSuggestions`](../../ifute-core-simple/src/apps/mobile/services/place.service.ts#L123) filtra Places por raio de distância a partir do `lat`/`lon` do usuário e retorna `[]` quando nada é encontrado — comportamento correto.
 
 O problema é o conteúdo do banco. **As 4 únicas Places em produção são todas de teste**, nas coordenadas convencionadas do Atlântico Sul (ver `CLAUDE.md` → "Testes em Produção"):
 
@@ -193,7 +193,7 @@ Duas razões pelas quais não se pode ir além de "Brasil, rede móvel TIM":
 
 ### 7.1 A coordenada exata existiu e foi descartada
 
-Este é o ponto crítico. O app envia `lat`, `lon`, `day` e `timezoneoffset` **em headers HTTP** nas chamadas `/place/discover` e `/place/city` (ver [`cityPlaceDiscovery`](../ifute-core-simple/src/apps/mobile/utils/validators/place.ts#L3)). O usuário fez ambas as chamadas. **O backend recebeu a posição precisa dele às 10:24:50 e 10:24:59.**
+Este é o ponto crítico. O app envia `lat`, `lon`, `day` e `timezoneoffset` **em headers HTTP** nas chamadas `/place/discover` e `/place/city` (ver [`cityPlaceDiscovery`](../../ifute-core-simple/src/apps/mobile/utils/validators/place.ts#L3)). O usuário fez ambas as chamadas. **O backend recebeu a posição precisa dele às 10:24:50 e 10:24:59.**
 
 Nada disso foi preservado:
 
@@ -218,7 +218,7 @@ Ordenados por relação valor/esforço.
 
 ### G2 — Headers de geolocalização descartados
 **Impacto:** não se sabe de onde vem a demanda. Cada busca vazia é um sinal de mercado perdido.
-**Correção:** logar `lat`/`lon` **arredondados a 2 casas decimais** (~1 km de precisão) e `timezoneoffset` nas rotas que já os recebem. O arredondamento não é preciosismo: coordenada exata de pessoa física é dado pessoal sob LGPD e iria para log de container. Resolver para nome de cidade na análise, não no caminho da requisição — já existe reverse geocoding no projeto ([`APILocation`](../ifute-core-simple/src/shared/api/location.ts), OpenWeatherMap), mas chamá-lo por requisição adicionaria latência e custo.
+**Correção:** logar `lat`/`lon` **arredondados a 2 casas decimais** (~1 km de precisão) e `timezoneoffset` nas rotas que já os recebem. O arredondamento não é preciosismo: coordenada exata de pessoa física é dado pessoal sob LGPD e iria para log de container. Resolver para nome de cidade na análise, não no caminho da requisição — já existe reverse geocoding no projeto ([`APILocation`](../../ifute-core-simple/src/shared/api/location.ts), OpenWeatherMap), mas chamá-lo por requisição adicionaria latência e custo.
 **Esforço:** baixo. **Maior retorno de negócio do conjunto.**
 **Status:** ✅ implementado em 09/08/2026 ([core-simple#114](https://github.com/Gabao-Farias/ifute-core-simple/pull/114)), com o arredondamento a 2 casas como recomendado.
 
@@ -232,6 +232,7 @@ Ordenados por relação valor/esforço.
 **Impacto:** o cadastro deste usuário só foi detectável pelo `created_at` na tabela `user`. Não há registro de logins bem-sucedidos, tentativas falhas, ou distinção entre primeiro login e login recorrente. `auth.service.ts` não usa o logger.
 **Correção:** logar `signup` e `login` como eventos explícitos, com `user_id` e se a conta foi criada naquela chamada.
 **Esforço:** baixo.
+**Status:** ✅ **fechado para o app mobile** em 17/08/2026, junto com G8 ([`tasks/task32.md`](../../tasks/task32.md)). Os handlers de auth passaram a distinguir conta criada de conta existente (`isNewUser`), gerando os eventos `user_signup` e `user_login` na tabela `business_event`. **Ressalva:** só o mobile — backoffice e director têm handlers de auth próprios e seguem sem o evento.
 
 ### G5 — `401` ambíguos
 **Impacto:** um `401` em rota `private` pode ser fluxo normal pré-login (como os três desta sessão) ou sessão expirada/token inválido. Nos logs, são indistinguíveis — impossível medir quebra de sessão.
@@ -254,6 +255,9 @@ Ordenados por relação valor/esforço.
 **Impacto:** a janela de investigação é acidental. O log do core cobria **apenas desde 05/08 14:43** (container recriado, arquivo único de 15 MB, ainda sem rotação). O do nginx cobria desde ~09/07 (`50m` × 4 arquivos, 186 MB). Este usuário se cadastrou no mesmo dia da análise — foi sorte. Um cadastro de 20 dias antes teria deixado rastro parcial; de 40 dias, nenhum.
 **Correção:** para eventos de negócio (signup, login, busca vazia, agendamento), gravar em **tabela de eventos no Postgres**, não em log de container. Log rotativo serve para depuração, não para análise de comportamento. Alternativa mínima: aumentar `max-file` no `docker-compose.yml`.
 **Esforço:** médio (tabela) ou trivial (retenção).
+**Status:** ✅ implementado em 17/08/2026 ([`tasks/task32.md`](../../tasks/task32.md)) — tabela `business_event` com os eventos `place_search`, `user_signup` e `user_login`. **Pendente de deploy** (a migration ainda não foi aplicada em lugar nenhum).
+
+> O diagnóstico envelheceu de um jeito que vale registrar. Este gap foi escrito olhando o driver `json-file` sem rotação; a adoção do `journald` (~28 dias / 250 MB) parecia resolver. **Não resolveu:** a medição de 16/08/2026 mostrou o journald **saturado no teto de 250 MB**, com janela real de **~6 dias**, e o `ifute-jobber` ocupando **41% dos bytes** do log do core. O que era "a janela de investigação é acidental" virou "a janela é de seis dias e anda para frente" — e a coordenada `-28.28, -54.26`, que aparecia nos relatórios de 10, 12 e 13/08, já não existe em nenhum log. O paliativo real não é aumentar retenção, é **parar de logar o webhook interno do jobber**.
 
 ### G9 — Sem analytics no app mobile
 **Impacto:** não há funil, não há tela vista, não há retenção/DAU, não há sessão. Todo o comportamento precisa ser reconstruído a partir de requisições HTTP, que só revelam o que chega ao servidor — não o que o usuário viu ou tocou. O app tem Firebase para push e remote-config, mas não `@react-native-firebase/analytics`.
@@ -281,9 +285,11 @@ Ordenados por relação valor/esforço.
 
 ## 10. Follow-up — o que foi implementado
 
-Em 09/08/2026, **G1, G2, G3, G6 e G7** foram implementados e estão em produção (core `0.3.6`). Documentação completa da implementação — decisões, armadilhas, custo medido — em [`tasks/task30.md`](../tasks/task30.md).
+Em 09/08/2026, **G1, G2, G3, G6 e G7** foram implementados e estão em produção (core `0.3.6`). Documentação completa da implementação — decisões, armadilhas, custo medido — em [`tasks/task30.md`](../../tasks/task30.md).
 
-Continuam **abertos**: G4, G5, G8 e G9 — e, mais importante que todos eles, a ação nº 1 da seção 9: **cadastrar quadras reais**. Reconfirmado após o deploy: `discover` com coordenadas de São Paulo devolve `places_in_radius: 0`. Nenhuma instrumentação muda o fato de que hoje 100% dos usuários reais veem tela vazia — o que ela dá agora é o mapa de onde essa demanda está.
+Em 17/08/2026, **G8 e G4** (este último só para o mobile) foram implementados na task 32 — a tabela `business_event`, ainda pendente de deploy.
+
+Continuam **abertos**: G5, G9 e o G4 dos apps de admin — e, mais importante que todos eles, a ação nº 1 da seção 9: **cadastrar quadras reais**. Reconfirmado após o deploy: `discover` com coordenadas de São Paulo devolve `places_in_radius: 0`. Nenhuma instrumentação muda o fato de que hoje 100% dos usuários reais veem tela vazia — o que ela dá agora é o mapa de onde essa demanda está.
 
 O log de acesso da API passa a ter este formato (campos ausentes são omitidos pelo pino):
 
